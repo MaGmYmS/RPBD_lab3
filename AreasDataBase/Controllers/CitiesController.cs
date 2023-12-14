@@ -20,10 +20,54 @@ namespace AreasDataBase.Controllers
         }
 
         // GET: Cities
-        public async Task<IActionResult> Index()
+        public async Task<IActionResult> Index(string searchString, string searchColumn, string sortOrder)
         {
-            var areasDataBaseContext = _context.City.Include(c => c.Area);
-            return View(await areasDataBaseContext.ToListAsync());
+            ViewData["NameCitySortParam"] = String.IsNullOrEmpty(sortOrder) ? "nameCity_desc" : "";
+            ViewData["PostalCodeSortParam"] = sortOrder == "PostalCode" ? "postalCode_desc" : "PostalCode";
+            ViewData["AreaNameSortParam"] = sortOrder == "AreaName" ? "areaName_desc" : "AreaName";
+
+            IQueryable<City> citiesQuery = _context.City.Include(a => a.Area);
+
+            switch (sortOrder)
+            {
+                case "nameCity_desc":
+                    citiesQuery = citiesQuery.OrderByDescending(c => c.NameCity);
+                    break;
+                case "PostalCode":
+                    citiesQuery = citiesQuery.OrderBy(c => c.PostalCode);
+                    break;
+                case "postalCode_desc":
+                    citiesQuery = citiesQuery.OrderByDescending(c => c.PostalCode);
+                    break;
+                case "AreaName":
+                    citiesQuery = citiesQuery.OrderBy(c => c.Area.NameArea);
+                    break;
+                case "areaName_desc":
+                    citiesQuery = citiesQuery.OrderByDescending(c => c.Area.NameArea);
+                    break;
+                default:
+                    citiesQuery = citiesQuery.OrderBy(c => c.NameCity);
+                    break;
+            }
+
+            if (!String.IsNullOrEmpty(searchString))
+            {
+                // Используйте выбранный столбец для поиска
+                switch (searchColumn)
+                {
+                    case "nameCity":
+                        citiesQuery = citiesQuery.Where(s => s.NameCity.ToLower().Contains(searchString.ToLower()));
+                        break;
+                    case "postalCode":
+                        citiesQuery = citiesQuery.Where(s => s.PostalCode.ToString().Contains(searchString.ToLower()));
+                        break;
+                    case "areaName":
+                        citiesQuery = citiesQuery.Where(s => s.Area.NameArea.ToLower().Contains(searchString.ToLower()));
+                        break;
+                }
+            }
+
+            return View(await citiesQuery.ToListAsync());
         }
 
         // GET: Cities/Details/5

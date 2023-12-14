@@ -20,11 +20,46 @@ namespace AreasDataBase.Controllers
         }
 
         // GET: Districts
-        public async Task<IActionResult> Index()
+        public async Task<IActionResult> Index(string searchString, string searchColumn, string sortOrder)
         {
-            var areasDataBaseContext = _context.District.Include(d => d.City);
-            return View(await areasDataBaseContext.ToListAsync());
+            ViewData["NameDistrictSortParam"] = String.IsNullOrEmpty(sortOrder) ? "nameDistrict_desc" : "";
+            ViewData["CityNameSortParam"] = sortOrder == "CityName" ? "cityName_desc" : "CityName";
+
+            IQueryable<District> districtsQuery = _context.District.Include(d => d.City);
+
+            switch (sortOrder)
+            {
+                case "nameDistrict_desc":
+                    districtsQuery = districtsQuery.OrderByDescending(d => d.NameDistrict);
+                    break;
+                case "CityName":
+                    districtsQuery = districtsQuery.OrderBy(d => d.City.NameCity);
+                    break;
+                case "cityName_desc":
+                    districtsQuery = districtsQuery.OrderByDescending(d => d.City.NameCity);
+                    break;
+                default:
+                    districtsQuery = districtsQuery.OrderBy(d => d.NameDistrict);
+                    break;
+            }
+
+            if (!String.IsNullOrEmpty(searchString))
+            {
+                // Используйте выбранный столбец для поиска
+                switch (searchColumn)
+                {
+                    case "nameDistrict":
+                        districtsQuery = districtsQuery.Where(s => s.NameDistrict.ToLower().Contains(searchString.ToLower()));
+                        break;
+                    case "cityName":
+                        districtsQuery = districtsQuery.Where(s => s.City.NameCity.ToLower().Contains(searchString.ToLower()));
+                        break;
+                }
+            }
+
+            return View(await districtsQuery.ToListAsync());
         }
+
 
         // GET: Districts/Details/5
         public async Task<IActionResult> Details(int? id)

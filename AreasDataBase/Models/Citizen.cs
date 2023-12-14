@@ -18,16 +18,16 @@ namespace AreasDataBase.Models
         public string FullName { get; set; }
 
         [Required(ErrorMessage = "Значение не может быть пустым")]
-        [StringLength(10, MinimumLength = 10, ErrorMessage = "Длина паспортных данных должна быть 10 символов")]
+        [Range(0, 9999999999, ErrorMessage = "Паспортные данные должны быть в диапазоне от 0 до 9999999999")]
         [Display(Name = "Паспортные данные")]
         [Column("passport_data")]
-        public string PassportData { get; set; }
+        public long PassportData { get; set; }
 
         [Required(ErrorMessage = "Значение не может быть пустым")]
-        [StringLength(11, MinimumLength = 11, ErrorMessage = "Длина номера телефона должна быть 11 символов")]
+        [Range(0, 99999999999, ErrorMessage = "Длина номера телефона должна быть 11 символов")]
         [Display(Name = "Номер телефона")]
         [Column("phone_number")]
-        public string PhoneNumber { get; set; }
+        public long PhoneNumber { get; set; }
 
         private DateTime _dateOfBirth;
 

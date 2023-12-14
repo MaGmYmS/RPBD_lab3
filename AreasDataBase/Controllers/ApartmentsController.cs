@@ -20,11 +20,66 @@ namespace AreasDataBase.Controllers
         }
 
         // GET: Apartments
-        public async Task<IActionResult> Index()
+        public async Task<IActionResult> Index(string searchString, string searchColumn, string sortOrder)
         {
-            var areasDataBaseContext = _context.Apartment.Include(a => a.ResidentialBuilding);
-            return View(await areasDataBaseContext.ToListAsync());
+            ViewData["ApartmentNumberSortParam"] = String.IsNullOrEmpty(sortOrder) ? "apartmentNumber_desc" : "";
+            ViewData["NumberOfRoomsSortParam"] = sortOrder == "NumberOfRooms" ? "numberOfRooms_desc" : "NumberOfRooms";
+            ViewData["AreaSortParam"] = sortOrder == "Area" ? "area_desc" : "Area";
+            ViewData["ResidentialBuildingSortParam"] = sortOrder == "ResidentialBuilding" ? "residentialBuilding_desc" : "ResidentialBuilding";
+
+            IQueryable<Apartment> apartmentsQuery = _context.Apartment.Include(a => a.ResidentialBuilding);
+
+            switch (sortOrder)
+            {
+                case "apartmentNumber_desc":
+                    apartmentsQuery = apartmentsQuery.OrderByDescending(a => a.ApartmentNumber);
+                    break;
+                case "NumberOfRooms":
+                    apartmentsQuery = apartmentsQuery.OrderBy(a => a.NumberOfRooms);
+                    break;
+                case "numberOfRooms_desc":
+                    apartmentsQuery = apartmentsQuery.OrderByDescending(a => a.NumberOfRooms);
+                    break;
+                case "Area":
+                    apartmentsQuery = apartmentsQuery.OrderBy(a => a.Area);
+                    break;
+                case "area_desc":
+                    apartmentsQuery = apartmentsQuery.OrderByDescending(a => a.Area);
+                    break;
+                case "ResidentialBuilding":
+                    apartmentsQuery = apartmentsQuery.OrderBy(a => a.ResidentialBuilding.HouseNumber);
+                    break;
+                case "residentialBuilding_desc":
+                    apartmentsQuery = apartmentsQuery.OrderByDescending(a => a.ResidentialBuilding.HouseNumber);
+                    break;
+                default:
+                    apartmentsQuery = apartmentsQuery.OrderBy(a => a.ApartmentNumber);
+                    break;
+            }
+
+            if (!String.IsNullOrEmpty(searchString))
+            {
+                // Используйте выбранный столбец для поиска
+                switch (searchColumn)
+                {
+                    case "apartmentNumber":
+                        apartmentsQuery = apartmentsQuery.Where(s => s.ApartmentNumber.ToString().ToLower().Contains(searchString.ToLower()));                  
+                        break;
+                    case "NumberOfRooms":
+                        apartmentsQuery = apartmentsQuery.Where(s => s.NumberOfRooms.ToString().Contains(searchString.ToLower()));
+                        break;
+                    case "Area":
+                        apartmentsQuery = apartmentsQuery.Where(s => s.Area.ToString().Contains(searchString.ToLower()));
+                        break;
+                    case "ResidentialBuilding":
+                        apartmentsQuery = apartmentsQuery.Where(s => s.ResidentialBuilding.HouseNumber.ToLower().Contains(searchString.ToLower()));
+                        break;
+                }
+            }
+
+            return View(await apartmentsQuery.ToListAsync());
         }
+
 
         // GET: Apartments/Details/5
         public async Task<IActionResult> Details(int? id)

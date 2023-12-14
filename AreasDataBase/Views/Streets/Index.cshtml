@@ -9,33 +9,73 @@
 <p>
     <a asp-action="Create">Create New</a>
 </p>
+
+<form id="searchForm" asp-action="Index">
+    <div class="input-group md-form form-sm form2 pl-0">
+        <input id="searchString" name="searchString" class="form-control my-0 py-1 red-border" type="text" placeholder="Search" aria-label="Search" value="" />
+        <div class="input-group-append">
+        </div>
+        <select id="searchColumn" name="searchColumn" class="form-control" value="">
+            <option value="nameStreet">Name Street</option>
+            <option value="districtName">District Name</option>
+            <!-- Add more options for other columns if needed -->
+        </select>
+        <button type="submit" class="btn btn-primary">Search</button>
+    </div>
+</form>
+
 <table class="table">
     <thead>
         <tr>
             <th>
-                @Html.DisplayNameFor(model => model.NameStreet)
+                <a asp-action="Index" asp-route-sortOrder="@ViewData["NameStreetSortParam"]">@Html.DisplayNameFor(model => model.NameStreet)</a>
             </th>
             <th>
-                @Html.DisplayNameFor(model => model.District)
+                <a asp-action="Index" asp-route-sortOrder="@ViewData["DistrictNameSortParam"]">@Html.DisplayNameFor(model => model.District.NameDistrict)</a>
             </th>
             <th></th>
         </tr>
     </thead>
     <tbody>
-@foreach (var item in Model) {
-        <tr>
-            <td>
-                @Html.DisplayFor(modelItem => item.NameStreet)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.District.NameDistrict)
-            </td>
-            <td>
-                <a asp-action="Edit" asp-route-id="@item.IdStreet">Edit</a> |
-                <a asp-action="Details" asp-route-id="@item.IdStreet">Details</a> |
-                <a asp-action="Delete" asp-route-id="@item.IdStreet">Delete</a>
-            </td>
-        </tr>
-}
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>
+                    @Html.DisplayFor(modelItem => item.NameStreet)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.District.NameDistrict)
+                </td>
+                <td>
+                    <a asp-action="Edit" asp-route-id="@item.IdStreet">Edit</a> |
+                    <a asp-action="Details" asp-route-id="@item.IdStreet">Details</a> |
+                    <a asp-action="Delete" asp-route-id="@item.IdStreet">Delete</a>
+                </td>
+            </tr>
+        }
     </tbody>
 </table>
+
+@section scripts {
+    <script>
+        $(function () {
+            // При отправке формы сохраняем значения в localStorage
+            $("#searchForm").submit(function () {
+                localStorage.setItem("searchString", $("#searchString").val());
+                localStorage.setItem("searchColumn", $("#searchColumn").val());
+            });
+
+            // При загрузке страницы восстанавливаем значения из localStorage
+            var savedSearchString = localStorage.getItem("searchString");
+            var savedSearchColumn = localStorage.getItem("searchColumn");
+
+            if (savedSearchString) {
+                $("#searchString").val(savedSearchString);
+            }
+
+            if (savedSearchColumn) {
+                $("#searchColumn").val(savedSearchColumn);
+            }
+        });
+    </script>
+}

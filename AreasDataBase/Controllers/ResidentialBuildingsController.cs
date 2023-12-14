@@ -20,11 +20,66 @@ namespace AreasDataBase.Controllers
         }
 
         // GET: ResidentialBuildings
-        public async Task<IActionResult> Index()
+        public async Task<IActionResult> Index(string searchString, string searchColumn, string sortOrder)
         {
-            var areasDataBaseContext = _context.ResidentialBuilding.Include(r => r.Street);
-            return View(await areasDataBaseContext.ToListAsync());
+            ViewData["HouseNumberSortParam"] = String.IsNullOrEmpty(sortOrder) ? "houseNumber_desc" : "";
+            ViewData["YearOfConstructionSortParam"] = sortOrder == "YearOfConstruction" ? "yearOfConstruction_desc" : "YearOfConstruction";
+            ViewData["NumbersOfFloorsSortParam"] = sortOrder == "NumbersOfFloors" ? "numbersOfFloors_desc" : "NumbersOfFloors";
+            ViewData["StreetNameSortParam"] = sortOrder == "StreetName" ? "streetName_desc" : "StreetName";
+
+            IQueryable<ResidentialBuilding> residentialBuildingsQuery = _context.ResidentialBuilding.Include(r => r.Street);
+
+            switch (sortOrder)
+            {
+                case "houseNumber_desc":
+                    residentialBuildingsQuery = residentialBuildingsQuery.OrderByDescending(r => r.HouseNumber);
+                    break;
+                case "YearOfConstruction":
+                    residentialBuildingsQuery = residentialBuildingsQuery.OrderBy(r => r.YearOfConstruction);
+                    break;
+                case "yearOfConstruction_desc":
+                    residentialBuildingsQuery = residentialBuildingsQuery.OrderByDescending(r => r.YearOfConstruction);
+                    break;
+                case "NumbersOfFloors":
+                    residentialBuildingsQuery = residentialBuildingsQuery.OrderBy(r => r.NumbersOfFloors);
+                    break;
+                case "numbersOfFloors_desc":
+                    residentialBuildingsQuery = residentialBuildingsQuery.OrderByDescending(r => r.NumbersOfFloors);
+                    break;
+                case "StreetName":
+                    residentialBuildingsQuery = residentialBuildingsQuery.OrderBy(r => r.Street.NameStreet);
+                    break;
+                case "streetName_desc":
+                    residentialBuildingsQuery = residentialBuildingsQuery.OrderByDescending(r => r.Street.NameStreet);
+                    break;
+                default:
+                    residentialBuildingsQuery = residentialBuildingsQuery.OrderBy(r => r.HouseNumber);
+                    break;
+            }
+
+            if (!String.IsNullOrEmpty(searchString))
+            {
+                // Используйте выбранный столбец для поиска
+                switch (searchColumn)
+                {
+                    case "houseNumber":
+                        residentialBuildingsQuery = residentialBuildingsQuery.Where(s => s.HouseNumber.ToString().Contains(searchString.ToLower()));
+                        break;
+                    case "YearOfConstruction":
+                        residentialBuildingsQuery = residentialBuildingsQuery.Where(s => s.YearOfConstruction.ToString().Contains(searchString.ToLower()));
+                        break;
+                    case "NumbersOfFloors":
+                        residentialBuildingsQuery = residentialBuildingsQuery.Where(s => s.NumbersOfFloors.ToString().Contains(searchString.ToLower()));
+                        break;
+                    case "streetName":
+                        residentialBuildingsQuery = residentialBuildingsQuery.Where(s => s.Street.NameStreet.ToLower().Contains(searchString.ToLower()));
+                        break;
+                }
+            }
+
+            return View(await residentialBuildingsQuery.ToListAsync());
         }
+
 
         // GET: ResidentialBuildings/Details/5
         public async Task<IActionResult> Details(int? id)

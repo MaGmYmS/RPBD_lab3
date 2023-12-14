@@ -20,11 +20,46 @@ namespace AreasDataBase.Controllers
         }
 
         // GET: Streets
-        public async Task<IActionResult> Index()
+        public async Task<IActionResult> Index(string searchString, string searchColumn, string sortOrder)
         {
-            var areasDataBaseContext = _context.Street.Include(s => s.District);
-            return View(await areasDataBaseContext.ToListAsync());
+            ViewData["NameStreetSortParam"] = String.IsNullOrEmpty(sortOrder) ? "nameStreet_desc" : "";
+            ViewData["DistrictNameSortParam"] = sortOrder == "DistrictName" ? "districtName_desc" : "DistrictName";
+
+            IQueryable<Street> streetsQuery = _context.Street.Include(s => s.District);
+
+            switch (sortOrder)
+            {
+                case "nameStreet_desc":
+                    streetsQuery = streetsQuery.OrderByDescending(s => s.NameStreet);
+                    break;
+                case "DistrictName":
+                    streetsQuery = streetsQuery.OrderBy(s => s.District.NameDistrict);
+                    break;
+                case "districtName_desc":
+                    streetsQuery = streetsQuery.OrderByDescending(s => s.District.NameDistrict);
+                    break;
+                default:
+                    streetsQuery = streetsQuery.OrderBy(s => s.NameStreet);
+                    break;
+            }
+
+            if (!String.IsNullOrEmpty(searchString))
+            {
+                // Используйте выбранный столбец для поиска
+                switch (searchColumn)
+                {
+                    case "nameStreet":
+                        streetsQuery = streetsQuery.Where(s => s.NameStreet.ToLower().Contains(searchString.ToLower()));
+                        break;
+                    case "districtName":
+                        streetsQuery = streetsQuery.Where(s => s.District.NameDistrict.ToLower().Contains(searchString.ToLower()));
+                        break;
+                }
+            }
+
+            return View(await streetsQuery.ToListAsync());
         }
+
 
         // GET: Streets/Details/5
         public async Task<IActionResult> Details(int? id)

@@ -9,45 +9,86 @@
 <p>
     <a asp-action="Create">Create New</a>
 </p>
+
+<form id="searchForm" asp-action="Index">
+    <div class="input-group md-form form-sm form2 pl-0">
+        <input id="searchString" name="searchString" class="form-control my-0 py-1 red-border" type="text" placeholder="Search" aria-label="Search" value="" />
+        <div class="input-group-append">
+        </div>
+        <select id="searchColumn" name="searchColumn" class="form-control" value="">
+            <option value="apartmentNumber">Apartment Number</option>
+            <option value="numberOfRooms">Number Of Rooms</option>
+            <option value="area">Area</option>
+            <option value="residentialBuilding.houseNumber">House Number</option>
+        </select>
+        <button type="submit" class="btn btn-primary">Search</button>
+    </div>
+</form>
+
 <table class="table">
     <thead>
         <tr>
             <th>
-                @Html.DisplayNameFor(model => model.ApartmentNumber)
+                <a asp-action="Index" asp-route-sortOrder="@ViewData["ApartmentNumberSortParam"]">@Html.DisplayNameFor(model => model.ApartmentNumber)</a>
             </th>
             <th>
-                @Html.DisplayNameFor(model => model.NumberOfRooms)
+                <a asp-action="Index" asp-route-sortOrder="@ViewData["NumberOfRoomsSortParam"]">@Html.DisplayNameFor(model => model.NumberOfRooms)</a>
             </th>
             <th>
-                @Html.DisplayNameFor(model => model.Area)
+                <a asp-action="Index" asp-route-sortOrder="@ViewData["AreaSortParam"]">@Html.DisplayNameFor(model => model.Area)</a>
             </th>
             <th>
-                @Html.DisplayNameFor(model => model.ResidentialBuilding)
+                <a asp-action="Index" asp-route-sortOrder="@ViewData["ResidentialBuildingSortParam"]">@Html.DisplayNameFor(model => model.ResidentialBuilding.HouseNumber)</a>
             </th>
             <th></th>
         </tr>
     </thead>
     <tbody>
-@foreach (var item in Model) {
-        <tr>
-            <td>
-                @Html.DisplayFor(modelItem => item.ApartmentNumber)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.NumberOfRooms)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Area)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.ResidentialBuilding.IdResidentialBuilding)
-            </td>
-            <td>
-                <a asp-action="Edit" asp-route-id="@item.IdApartment">Edit</a> |
-                <a asp-action="Details" asp-route-id="@item.IdApartment">Details</a> |
-                <a asp-action="Delete" asp-route-id="@item.IdApartment">Delete</a>
-            </td>
-        </tr>
-}
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>
+                    @Html.DisplayFor(modelItem => item.ApartmentNumber)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.NumberOfRooms)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Area)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.ResidentialBuilding.HouseNumber)
+                </td>
+                <td>
+                    <a asp-action="Edit" asp-route-id="@item.IdApartment">Edit</a> |
+                    <a asp-action="Details" asp-route-id="@item.IdApartment">Details</a> |
+                    <a asp-action="Delete" asp-route-id="@item.IdApartment">Delete</a>
+                </td>
+            </tr>
+        }
     </tbody>
 </table>
+
+@section scripts {
+    <script>
+        $(function () {
+            // При отправке формы сохраняем значения в localStorage
+            $("#searchForm").submit(function () {
+                localStorage.setItem("searchString", $("#searchString").val());
+                localStorage.setItem("searchColumn", $("#searchColumn").val());
+            });
+
+            // При загрузке страницы восстанавливаем значения из localStorage
+            var savedSearchString = localStorage.getItem("searchString");
+            var savedSearchColumn = localStorage.getItem("searchColumn");
+
+            if (savedSearchString) {
+                $("#searchString").val(savedSearchString);
+            }
+
+            if (savedSearchColumn) {
+                $("#searchColumn").val(savedSearchColumn);
+            }
+        });
+    </script>
+}
