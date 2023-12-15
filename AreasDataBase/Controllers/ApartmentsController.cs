@@ -63,15 +63,15 @@ namespace AreasDataBase.Controllers
                 switch (searchColumn)
                 {
                     case "apartmentNumber":
-                        apartmentsQuery = apartmentsQuery.Where(s => s.ApartmentNumber.ToString().ToLower().Contains(searchString.ToLower()));                  
+                        apartmentsQuery = apartmentsQuery.Where(s => s.ApartmentNumber.ToString().ToLower().Contains(searchString.ToLower()));
                         break;
-                    case "NumberOfRooms":
+                    case "numberOfRooms":
                         apartmentsQuery = apartmentsQuery.Where(s => s.NumberOfRooms.ToString().Contains(searchString.ToLower()));
                         break;
-                    case "Area":
+                    case "area":
                         apartmentsQuery = apartmentsQuery.Where(s => s.Area.ToString().Contains(searchString.ToLower()));
                         break;
-                    case "ResidentialBuilding":
+                    case "residentialBuilding.houseNumber":
                         apartmentsQuery = apartmentsQuery.Where(s => s.ResidentialBuilding.HouseNumber.ToLower().Contains(searchString.ToLower()));
                         break;
                 }
@@ -79,7 +79,6 @@ namespace AreasDataBase.Controllers
 
             return View(await apartmentsQuery.ToListAsync());
         }
-
 
         // GET: Apartments/Details/5
         public async Task<IActionResult> Details(int? id)
@@ -103,7 +102,7 @@ namespace AreasDataBase.Controllers
         // GET: Apartments/Create
         public IActionResult Create()
         {
-            ViewData["ResidentialBuildingId"] = new SelectList(_context.ResidentialBuilding, "IdResidentialBuilding", "IdResidentialBuilding");
+            ViewData["ResidentialBuildingId"] = new SelectList(_context.ResidentialBuilding, "IdResidentialBuilding", "HouseNumber");
             return View();
         }
 
@@ -120,7 +119,7 @@ namespace AreasDataBase.Controllers
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
-            ViewData["ResidentialBuildingId"] = new SelectList(_context.ResidentialBuilding, "IdResidentialBuilding", "IdResidentialBuilding", apartment.ResidentialBuildingId);
+            ViewData["ResidentialBuildingId"] = new SelectList(_context.ResidentialBuilding, "IdResidentialBuilding", "HouseNumber", apartment.ResidentialBuildingId);
             return View(apartment);
         }
 
@@ -137,7 +136,7 @@ namespace AreasDataBase.Controllers
             {
                 return NotFound();
             }
-            ViewData["ResidentialBuildingId"] = new SelectList(_context.ResidentialBuilding, "IdResidentialBuilding", "IdResidentialBuilding", apartment.ResidentialBuildingId);
+            ViewData["ResidentialBuildingId"] = new SelectList(_context.ResidentialBuilding, "IdResidentialBuilding", "HouseNumber", apartment.ResidentialBuildingId);
             return View(apartment);
         }
 
@@ -173,7 +172,7 @@ namespace AreasDataBase.Controllers
                 }
                 return RedirectToAction(nameof(Index));
             }
-            ViewData["ResidentialBuildingId"] = new SelectList(_context.ResidentialBuilding, "IdResidentialBuilding", "IdResidentialBuilding", apartment.ResidentialBuildingId);
+            ViewData["ResidentialBuildingId"] = new SelectList(_context.ResidentialBuilding, "IdResidentialBuilding", "HouseNumber", apartment.ResidentialBuildingId);
             return View(apartment);
         }
 

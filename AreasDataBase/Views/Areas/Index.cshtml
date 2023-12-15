@@ -4,10 +4,10 @@
     ViewData["Title"] = "Index";
 }
 
-<h1>Index</h1>
+<h1>Список областей</h1>
 
 <p>
-    <a asp-action="Create">Create New</a>
+    <a asp-action="Create">Добавить новую запись</a>
 </p>
 
 <form id="searchForm" asp-action="Index">
@@ -16,10 +16,10 @@
         <div class="input-group-append">
         </div>
         <select id="searchColumn" name="searchColumn" class="form-control" value="">
-            <option value="subjectCode">Subject Code</option>
-            <option value="nameArea">Name Area</option>
+            <option value="subjectCode">Код региона</option>
+            <option value="nameArea">Название области</option>
         </select>
-        <button type="submit" class="btn btn-primary">Search</button>
+        <button type="submit" class="btn btn-primary">Поиск</button>
     </div>
 </form>
 
@@ -46,9 +46,8 @@
                     @Html.DisplayFor(modelItem => item.NameArea)
                 </td>
                 <td>
-                    <a asp-action="Edit" asp-route-id="@item.IdArea">Edit</a> |
-                    <a asp-action="Details" asp-route-id="@item.IdArea">Details</a> |
-                    <a asp-action="Delete" asp-route-id="@item.IdArea">Delete</a>
+                    <a asp-action="Edit" asp-route-id="@item.IdArea">Редактировать</a> |
+                    <a asp-action="Delete" asp-route-id="@item.IdArea">Удалить</a>
                 </td>
             </tr>
         }

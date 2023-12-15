@@ -13,7 +13,6 @@ namespace AreasDataBase.Models
 
         [Required(ErrorMessage = "Значение не может быть пустым")]
         [Display(Name = "Номер дома")]
-        //[Range(1, 1000, ErrorMessage = "Номер дома должен быть в диапазоне от 1 до 1000")]
         [Column("house_number")]
         public string HouseNumber { get; set; }
 

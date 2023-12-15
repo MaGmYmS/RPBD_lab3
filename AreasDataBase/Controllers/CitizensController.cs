@@ -19,12 +19,88 @@ namespace AreasDataBase.Controllers
             _context = context;
         }
 
-        // GET: Citizens
-        public async Task<IActionResult> Index()
+        public async Task<IActionResult> Index(string searchString, string searchColumn, string sortOrder)
         {
-            var areasDataBaseContext = _context.Citizen.Include(c => c.Apartment);
-            return View(await areasDataBaseContext.ToListAsync());
+            ViewData["FullNameSortParam"] = string.IsNullOrEmpty(sortOrder) ? "fullName_desc" : "";
+            ViewData["PassportSortParam"] = sortOrder == "passport" ? "passport_desc" : "passport";
+            ViewData["PhoneNumberSortParam"] = sortOrder == "phoneNumber" ? "phoneNumber_desc" : "phoneNumber";
+            ViewData["DateOfBirthSortParam"] = sortOrder == "dateOfBirth" ? "dateOfBirth_desc" : "dateOfBirth";
+            ViewData["GenderSortParam"] = sortOrder == "gender" ? "gender_desc" : "gender";
+            ViewData["ApartmentSortParam"] = sortOrder == "apartment" ? "apartment_desc" : "apartment";
+
+            IQueryable<Citizen> citizens = _context.Citizen.Include(a => a.Apartment);
+
+            switch (sortOrder)
+            {
+                case "fullName_desc":
+                    citizens = citizens.OrderByDescending(c => c.FullName);
+                    break;
+                case "passport":
+                    citizens = citizens.OrderBy(c => c.PassportData);
+                    break;
+                case "passport_desc":
+                    citizens = citizens.OrderByDescending(c => c.PassportData);
+                    break;
+                case "phoneNumber":
+                    citizens = citizens.OrderBy(c => c.PhoneNumber);
+                    break;
+                case "phoneNumber_desc":
+                    citizens = citizens.OrderByDescending(c => c.PhoneNumber);
+                    break;
+                case "dateOfBirth":
+                    citizens = citizens.OrderBy(c => c.DateOfBirth);
+                    break;
+                case "dateOfBirth_desc":
+                    citizens = citizens.OrderByDescending(c => c.DateOfBirth);
+                    break;
+                case "gender":
+                    citizens = citizens.OrderBy(c => c.Gender);
+                    break;
+                case "gender_desc":
+                    citizens = citizens.OrderByDescending(c => c.Gender);
+                    break;
+                case "apartment":
+                    citizens = citizens.OrderBy(c => c.Apartment.ApartmentNumber);
+                    break;
+                case "apartment_desc":
+                    citizens = citizens.OrderByDescending(c => c.Apartment.ApartmentNumber);
+                    break;
+                default:
+                    citizens = citizens.OrderBy(c => c.FullName);
+                    break;
+            }
+
+            if (!String.IsNullOrEmpty(searchString))
+            {
+                // Используйте выбранный столбец для поиска
+                switch (searchColumn)
+                {
+                    case "fullName":
+                        citizens = citizens.Where(s => s.FullName.ToLower().Contains(searchString.ToLower()));
+                        break;
+                    case "passportData":
+                        citizens = citizens.Where(s => s.PassportData.ToString().ToLower().Contains(searchString.ToLower()));
+                        break;
+                    case "phoneNumber":
+                        citizens = citizens.Where(s => s.PhoneNumber.ToString().ToLower().Contains(searchString.ToLower()));
+                        break;
+                    case "dateOfBirth":
+                        citizens = citizens.Where(s => s.DateOfBirth.ToString().Contains(searchString.ToLower()));
+                        break;
+                    case "gender":
+                        citizens = citizens.Where(s => s.Gender.ToString().ToLower().Contains(searchString.ToLower()));
+                        break;
+                    case "apartmentNumber":
+                        citizens = citizens.Where(s => s.Apartment.ApartmentNumber.ToString().Contains(searchString.ToLower()));
+                        break;
+                        // Добавьте другие case для остальных столбцов, если необходимо
+                }
+            }
+
+            return View(await citizens.ToListAsync());
         }
+
+
 
         // GET: Citizens/Details/5
         public async Task<IActionResult> Details(int? id)

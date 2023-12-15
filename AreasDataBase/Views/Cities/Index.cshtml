@@ -1,27 +1,27 @@
 ﻿@model IEnumerable<AreasDataBase.Models.City>
 
 @{
-    ViewData["Title"] = "Index";
+    ViewData["Title"] = "Список городов";
 }
 
-<h1>Index</h1>
+<h1>Список городов</h1>
 
 <p>
-    <a asp-action="Create">Create New</a>
+    <a asp-action="Create">Добавить новую запись</a>
 </p>
 
 <form id="searchForm" asp-action="Index">
     <div class="input-group md-form form-sm form2 pl-0">
-        <input id="searchString" name="searchString" class="form-control my-0 py-1 red-border" type="text" placeholder="Search" aria-label="Search" value="" />
+        <input id="searchString" name="searchString" class="form-control my-0 py-1 red-border" type="text" placeholder="Поиск" aria-label="Поиск" value="" />
         <div class="input-group-append">
         </div>
         <select id="searchColumn" name="searchColumn" class="form-control" value="">
-            <option value="nameCity">Name City</option>
-            <option value="postalCode">Postal Code</option>
-            <option value="areaName">Area Name</option>
-            <!-- Add more options for other columns if needed -->
+            <option value="nameCity">Название города</option>
+            <option value="postalCode">Почтовый код</option>
+            <option value="areaName">Название области</option>
+            <!-- Добавьте другие опции для других столбцов при необходимости -->
         </select>
-        <button type="submit" class="btn btn-primary">Search</button>
+        <button type="submit" class="btn btn-primary">Поиск</button>
     </div>
 </form>
 
@@ -54,9 +54,9 @@
                     @Html.DisplayFor(modelItem => item.Area.NameArea)
                 </td>
                 <td>
-                    <a asp-action="Edit" asp-route-id="@item.IdCity">Edit</a> |
-                    <a asp-action="Details" asp-route-id="@item.IdCity">Details</a> |
-                    <a asp-action="Delete" asp-route-id="@item.IdCity">Delete</a>
+                    <a asp-action="Edit" asp-route-id="@item.IdCity">Редактировать</a> |
+                    <a asp-action="Details" asp-route-id="@item.IdCity">Детали</a> |
+                    <a asp-action="Delete" asp-route-id="@item.IdCity">Удалить</a>
                 </td>
             </tr>
         }
