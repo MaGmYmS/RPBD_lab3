@@ -4,24 +4,24 @@
     ViewData["Title"] = "Index";
 }
 
-<h1>Index</h1>
+<h1>Список домов</h1>
 
 <p>
-    <a asp-action="Create">Create New</a>
+    <a asp-action="Create">Добавить новую запись</a>
 </p>
 <form id="searchForm" asp-action="Index">
     <div class="input-group md-form form-sm form2 pl-0">
-        <input id="searchString" name="searchString" class="form-control my-0 py-1 red-border" type="text" placeholder="Search" aria-label="Search" value="" />
+        <input id="searchString" name="searchString" class="form-control my-0 py-1 red-border" type="text" placeholder="Поиск" aria-label="Search" value="" />
         <div class="input-group-append">
         </div>
         <select id="searchColumn" name="searchColumn" class="form-control" value="">
-            <option value="houseNumber">House Number</option>
-            <option value="YearOfConstruction">Year Of Construction</option>
-            <option value="NumbersOfFloors">Numbers Of Floors</option>
-            <option value="streetName">Street Name</option>
+            <option value="houseNumber">Номер дома</option>
+            <option value="YearOfConstruction">Год постройки</option>
+            <option value="NumbersOfFloors">Количество этажей</option>
+            <option value="streetName">Название улицы</option>
             <!-- Add more options for other columns if needed -->
         </select>
-        <button type="submit" class="btn btn-primary">Search</button>
+        <button type="submit" class="btn btn-primary">Поиск</button>
     </div>
 </form>
 
@@ -60,9 +60,8 @@
                     @Html.DisplayFor(modelItem => item.Street.NameStreet)
                 </td>
                 <td>
-                    <a asp-action="Edit" asp-route-id="@item.IdResidentialBuilding">Edit</a> |
-                    <a asp-action="Details" asp-route-id="@item.IdResidentialBuilding">Details</a> |
-                    <a asp-action="Delete" asp-route-id="@item.IdResidentialBuilding">Delete</a>
+                    <a asp-action="Edit" asp-route-id="@item.IdResidentialBuilding">Редактировать</a> |
+                    <a asp-action="Delete" asp-route-id="@item.IdResidentialBuilding">Удалить</a>
                 </td>
             </tr>
         }
