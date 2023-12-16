@@ -24,8 +24,11 @@ namespace AreasDataBase.Controllers
         {
             ViewData["NameStreetSortParam"] = String.IsNullOrEmpty(sortOrder) ? "nameStreet_desc" : "";
             ViewData["DistrictNameSortParam"] = sortOrder == "DistrictName" ? "districtName_desc" : "DistrictName";
+            ViewData["CityNameSortParam"] = sortOrder == "CityName" ? "cityName_desc" : "CityName"; // Добавлен параметр для сортировки по названию города
 
-            IQueryable<Street> streetsQuery = _context.Street.Include(s => s.District);
+            IQueryable<Street> streetsQuery = _context.Street
+                .Include(s => s.District)
+                    .ThenInclude(d => d.City); // Явное включение District и City
 
             switch (sortOrder)
             {
@@ -37,6 +40,12 @@ namespace AreasDataBase.Controllers
                     break;
                 case "districtName_desc":
                     streetsQuery = streetsQuery.OrderByDescending(s => s.District.NameDistrict);
+                    break;
+                case "CityName": // Добавлен случай для сортировки по названию города
+                    streetsQuery = streetsQuery.OrderBy(s => s.District.City.NameCity);
+                    break;
+                case "cityName_desc": // Добавлен случай для сортировки по названию города в обратном порядке
+                    streetsQuery = streetsQuery.OrderByDescending(s => s.District.City.NameCity);
                     break;
                 default:
                     streetsQuery = streetsQuery.OrderBy(s => s.NameStreet);
@@ -54,11 +63,15 @@ namespace AreasDataBase.Controllers
                     case "districtName":
                         streetsQuery = streetsQuery.Where(s => s.District.NameDistrict.ToLower().Contains(searchString.ToLower()));
                         break;
+                    case "сityName": // Добавлен случай для поиска по названию города
+                        streetsQuery = streetsQuery.Where(s => s.District.City.NameCity.ToLower().Contains(searchString.ToLower()));
+                        break;
                 }
             }
 
             return View(await streetsQuery.ToListAsync());
         }
+
 
 
         // GET: Streets/Details/5
@@ -84,8 +97,23 @@ namespace AreasDataBase.Controllers
         public IActionResult Create()
         {
             ViewData["DistrictId"] = new SelectList(_context.District, "IdDistrict", "NameDistrict");
+            ViewData["CityId"] = new SelectList(_context.City, "IdCity", "NameCity");
             return View();
         }
+
+
+        [HttpGet]
+        public JsonResult GetDistrictsByCity(int cityId)
+        {
+            var districts = _context.District
+                .Where(d => d.CityId == cityId)
+                .Select(d => new { IdDistrict = d.IdDistrict, NameDistrict = d.NameDistrict })
+                .ToList();
+
+            return Json(districts);
+        }
+
+
 
         // POST: Streets/Create
         // To protect from overposting attacks, enable the specific properties you want to bind to.
@@ -118,6 +146,8 @@ namespace AreasDataBase.Controllers
                 return NotFound();
             }
             ViewData["DistrictId"] = new SelectList(_context.District, "IdDistrict", "NameDistrict", street.DistrictId);
+            ViewBag.CityId = new SelectList(_context.City, "IdCity", "NameCity");
+
             return View(street);
         }
 

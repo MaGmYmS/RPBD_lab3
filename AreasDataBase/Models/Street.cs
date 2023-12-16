@@ -23,6 +23,7 @@ namespace AreasDataBase.Models
         [ForeignKey("district")]
         public int DistrictId { get; set; }
 
+
         public virtual District? District { get; set; }
 
         public List<ResidentialBuilding> ResidentialBuildings { get; set; } = new List<ResidentialBuilding>();

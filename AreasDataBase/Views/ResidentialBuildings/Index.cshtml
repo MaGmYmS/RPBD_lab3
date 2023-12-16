@@ -19,6 +19,8 @@
             <option value="YearOfConstruction">Год постройки</option>
             <option value="NumbersOfFloors">Количество этажей</option>
             <option value="streetName">Название улицы</option>
+            <option value="districtName">Название района</option>
+            <option value="cityName">Название города</option>
             <!-- Add more options for other columns if needed -->
         </select>
         <button type="submit" class="btn btn-primary">Поиск</button>
@@ -40,6 +42,12 @@
             <th>
                 <a asp-action="Index" asp-route-sortOrder="@ViewData["StreetNameSortParam"]">@Html.DisplayNameFor(model => model.Street.NameStreet)</a>
             </th>
+            <th>
+                <a asp-action="Index" asp-route-sortOrder="@ViewData["DistrictNameSortParam"]">@Html.DisplayNameFor(model => model.Street.District.NameDistrict)</a>
+            </th>
+            <th>
+                <a asp-action="Index" asp-route-sortOrder="@ViewData["CityNameSortParam"]">@Html.DisplayNameFor(model => model.Street.District.City.NameCity)</a>
+            </th>
             <th></th>
         </tr>
     </thead>
@@ -58,6 +66,12 @@
                 </td>
                 <td>
                     @Html.DisplayFor(modelItem => item.Street.NameStreet)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Street.District.NameDistrict)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Street.District.City.NameCity)
                 </td>
                 <td>
                     <a asp-action="Edit" asp-route-id="@item.IdResidentialBuilding">Редактировать</a> |

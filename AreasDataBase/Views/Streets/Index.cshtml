@@ -18,7 +18,7 @@
         <select id="searchColumn" name="searchColumn" class="form-control" value="">
             <option value="nameStreet">Название улицы</option>
             <option value="districtName">Название района</option>
-            <!-- Add more options for other columns if needed -->
+            <option value="сityName">Название города</option>
         </select>
         <button type="submit" class="btn btn-primary">Поиск</button>
     </div>
@@ -33,6 +33,9 @@
             <th>
                 <a asp-action="Index" asp-route-sortOrder="@ViewData["DistrictNameSortParam"]">@Html.DisplayNameFor(model => model.District.NameDistrict)</a>
             </th>
+            <th>
+                <a asp-action="Index" asp-route-sortOrder="@ViewData["CityNameSortParam"]">@Html.DisplayNameFor(model => model.District.City.NameCity)</a>
+            </th>
             <th></th>
         </tr>
     </thead>
@@ -46,6 +49,17 @@
                 <td>
                     @Html.DisplayFor(modelItem => item.District.NameDistrict)
                 </td>
+                <td>
+                    @if (item.District != null && item.District.City != null)
+                    {
+                        @Html.DisplayFor(modelItem => item.District.City.NameCity)
+                    }
+                    else
+                    {
+                        @Html.Raw("null")
+                    }
+                </td>
+
                 <td>
                     <a asp-action="Edit" asp-route-id="@item.IdStreet">Редактировать</a> |
                     <a asp-action="Delete" asp-route-id="@item.IdStreet">Удалить</a>

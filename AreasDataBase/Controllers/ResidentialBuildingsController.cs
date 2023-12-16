@@ -63,27 +63,23 @@ namespace AreasDataBase.Controllers
                 switch (searchColumn)
                 {
                     case "houseNumber":
-                        residentialBuildingsQuery = residentialBuildingsQuery
-                            .Where(r => EF.Functions.Like(r.HouseNumber, $"%{searchString}%"));
+                        residentialBuildingsQuery = residentialBuildingsQuery.Where(r => r.HouseNumber.ToString().Contains(searchString));
                         break;
                     case "YearOfConstruction":
-                        residentialBuildingsQuery = residentialBuildingsQuery
-                            .Where(r => EF.Functions.Like(r.YearOfConstruction.ToString(), $"%{searchString}%"));
+                        residentialBuildingsQuery = residentialBuildingsQuery.Where(r => r.YearOfConstruction.ToString().Contains(searchString));
                         break;
                     case "NumbersOfFloors":
-                        residentialBuildingsQuery = residentialBuildingsQuery
-                            .Where(r => EF.Functions.Like(r.NumbersOfFloors.ToString(), $"%{searchString}%"));
+                        residentialBuildingsQuery = residentialBuildingsQuery.Where(r => r.NumbersOfFloors.ToString().Contains(searchString));
                         break;
                     case "streetName":
-                        residentialBuildingsQuery = residentialBuildingsQuery
-                            .Where(r => EF.Functions.Like(r.Street.NameStreet, $"%{searchString}%"));
+                        residentialBuildingsQuery = residentialBuildingsQuery.Where(r => r.Street.NameStreet.Contains(searchString));
                         break;
                 }
             }
 
-
             return View(await residentialBuildingsQuery.ToListAsync());
         }
+
 
 
         // GET: ResidentialBuildings/Details/5
