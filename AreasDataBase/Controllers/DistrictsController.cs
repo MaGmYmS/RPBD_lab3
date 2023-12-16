@@ -19,7 +19,6 @@ namespace AreasDataBase.Controllers
             _context = context;
         }
 
-        // GET: Districts
         public async Task<IActionResult> Index(string searchString, string searchColumn, string sortOrder)
         {
             ViewData["NameDistrictSortParam"] = String.IsNullOrEmpty(sortOrder) ? "nameDistrict_desc" : "";

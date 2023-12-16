@@ -26,8 +26,13 @@ namespace AreasDataBase.Controllers
             ViewData["YearOfConstructionSortParam"] = sortOrder == "YearOfConstruction" ? "yearOfConstruction_desc" : "YearOfConstruction";
             ViewData["NumbersOfFloorsSortParam"] = sortOrder == "NumbersOfFloors" ? "numbersOfFloors_desc" : "NumbersOfFloors";
             ViewData["StreetNameSortParam"] = sortOrder == "StreetName" ? "streetName_desc" : "StreetName";
+            ViewData["DistrictNameSortParam"] = sortOrder == "DistrictName" ? "districtName_desc" : "DistrictName";
+            ViewData["CityNameSortParam"] = sortOrder == "CityName" ? "cityName_desc" : "CityName";
 
-            IQueryable<ResidentialBuilding> residentialBuildingsQuery = _context.ResidentialBuilding.Include(r => r.Street);
+            IQueryable<ResidentialBuilding> residentialBuildingsQuery = _context.ResidentialBuilding
+                .Include(r => r.Street)
+                    .ThenInclude(s => s.District)
+                        .ThenInclude(d => d.City);
 
             switch (sortOrder)
             {
@@ -52,6 +57,18 @@ namespace AreasDataBase.Controllers
                 case "streetName_desc":
                     residentialBuildingsQuery = residentialBuildingsQuery.OrderByDescending(r => r.Street.NameStreet);
                     break;
+                case "DistrictName":
+                    residentialBuildingsQuery = residentialBuildingsQuery.OrderBy(r => r.Street.District.NameDistrict);
+                    break;
+                case "districtName_desc":
+                    residentialBuildingsQuery = residentialBuildingsQuery.OrderByDescending(r => r.Street.District.NameDistrict);
+                    break;
+                case "CityName":
+                    residentialBuildingsQuery = residentialBuildingsQuery.OrderBy(r => r.Street.District.City.NameCity);
+                    break;
+                case "cityName_desc":
+                    residentialBuildingsQuery = residentialBuildingsQuery.OrderByDescending(r => r.Street.District.City.NameCity);
+                    break;
                 default:
                     residentialBuildingsQuery = residentialBuildingsQuery.OrderBy(r => r.HouseNumber);
                     break;
@@ -63,22 +80,35 @@ namespace AreasDataBase.Controllers
                 switch (searchColumn)
                 {
                     case "houseNumber":
-                        residentialBuildingsQuery = residentialBuildingsQuery.Where(r => r.HouseNumber.ToString().Contains(searchString));
+                        residentialBuildingsQuery = residentialBuildingsQuery
+                            .Where(r => EF.Functions.Like(r.HouseNumber, $"%{searchString}%"));
                         break;
                     case "YearOfConstruction":
-                        residentialBuildingsQuery = residentialBuildingsQuery.Where(r => r.YearOfConstruction.ToString().Contains(searchString));
+                        residentialBuildingsQuery = residentialBuildingsQuery
+                            .Where(r => EF.Functions.Like(r.YearOfConstruction.ToString(), $"%{searchString}%"));
                         break;
                     case "NumbersOfFloors":
-                        residentialBuildingsQuery = residentialBuildingsQuery.Where(r => r.NumbersOfFloors.ToString().Contains(searchString));
+                        residentialBuildingsQuery = residentialBuildingsQuery
+                            .Where(r => EF.Functions.Like(r.NumbersOfFloors.ToString(), $"%{searchString}%"));
                         break;
                     case "streetName":
-                        residentialBuildingsQuery = residentialBuildingsQuery.Where(r => r.Street.NameStreet.Contains(searchString));
+                        residentialBuildingsQuery = residentialBuildingsQuery
+                            .Where(r => EF.Functions.Like(r.Street.NameStreet, $"%{searchString}%"));
+                        break;
+                    case "districtName":
+                        residentialBuildingsQuery = residentialBuildingsQuery
+                            .Where(r => EF.Functions.Like(r.Street.District.NameDistrict, $"%{searchString}%"));
+                        break;
+                    case "cityName":
+                        residentialBuildingsQuery = residentialBuildingsQuery
+                            .Where(r => EF.Functions.Like(r.Street.District.City.NameCity, $"%{searchString}%"));
                         break;
                 }
             }
 
             return View(await residentialBuildingsQuery.ToListAsync());
         }
+
 
 
 
@@ -104,9 +134,13 @@ namespace AreasDataBase.Controllers
         // GET: ResidentialBuildings/Create
         public IActionResult Create()
         {
+            ViewData["CityId"] = new SelectList(_context.City, "IdCity", "NameCity");
+            ViewData["DistrictId"] = new SelectList(_context.District, "IdDistrict", "NameDistrict");
             ViewData["StreetId"] = new SelectList(_context.Street, "IdStreet", "NameStreet");
+
             return View();
         }
+
 
         // POST: ResidentialBuildings/Create
         // To protect from overposting attacks, enable the specific properties you want to bind to.
@@ -121,6 +155,8 @@ namespace AreasDataBase.Controllers
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
+            ViewData["CityId"] = new SelectList(_context.City, "IdCity", "NameCity", residentialBuilding.Street.District.CityId);
+            ViewData["DistrictId"] = new SelectList(_context.District, "IdDistrict", "NameDistrict", residentialBuilding.Street.DistrictId);
             ViewData["StreetId"] = new SelectList(_context.Street, "IdStreet", "NameStreet", residentialBuilding.StreetId);
             return View(residentialBuilding);
         }
@@ -133,14 +169,39 @@ namespace AreasDataBase.Controllers
                 return NotFound();
             }
 
-            var residentialBuilding = await _context.ResidentialBuilding.FindAsync(id);
+            var residentialBuilding = _context.ResidentialBuilding
+                .Include(rb => rb.Street)
+                    .ThenInclude(s => s.District)
+                        .ThenInclude(d => d.City)
+                .FirstOrDefault(rb => rb.IdResidentialBuilding == id);
+
             if (residentialBuilding == null)
             {
                 return NotFound();
             }
-            ViewData["StreetId"] = new SelectList(_context.Street, "IdStreet", "NameStreet", residentialBuilding.StreetId);
+
+            // Заполнение списка городов
+            ViewBag.CityId = new SelectList(_context.City, "IdCity", "NameCity", residentialBuilding.Street.District.CityId);
+
+            // Заполнение списка районов для выбранного города
+            ViewBag.DistrictId = new SelectList(
+                _context.District.Where(d => d.CityId == residentialBuilding.Street.District.CityId),
+                "IdDistrict",
+                "NameDistrict",
+                residentialBuilding.Street.DistrictId
+            );
+
+            // Заполнение списка улиц для выбранного района
+            ViewBag.StreetId = new SelectList(
+                _context.Street.Where(s => s.DistrictId == residentialBuilding.Street.DistrictId),
+                "IdStreet",
+                "NameStreet",
+                residentialBuilding.StreetId
+            );
+
             return View(residentialBuilding);
         }
+
 
         // POST: ResidentialBuildings/Edit/5
         // To protect from overposting attacks, enable the specific properties you want to bind to.
@@ -174,6 +235,8 @@ namespace AreasDataBase.Controllers
                 }
                 return RedirectToAction(nameof(Index));
             }
+            ViewData["CityId"] = new SelectList(_context.City, "IdCity", "NameCity", residentialBuilding.Street.District.CityId);
+            ViewData["DistrictId"] = new SelectList(_context.District, "IdDistrict", "NameDistrict", residentialBuilding.Street.DistrictId);
             ViewData["StreetId"] = new SelectList(_context.Street, "IdStreet", "NameStreet", residentialBuilding.StreetId);
             return View(residentialBuilding);
         }

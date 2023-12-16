@@ -13,26 +13,43 @@
         <form asp-action="Edit">
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
             <input type="hidden" asp-for="IdResidentialBuilding" />
+
             <div class="form-group">
                 <label asp-for="HouseNumber" class="control-label"></label>
                 <input asp-for="HouseNumber" class="form-control" />
                 <span asp-validation-for="HouseNumber" class="text-danger"></span>
             </div>
+
             <div class="form-group">
                 <label asp-for="YearOfConstruction" class="control-label"></label>
                 <input asp-for="YearOfConstruction" class="form-control" />
                 <span asp-validation-for="YearOfConstruction" class="text-danger"></span>
             </div>
+
             <div class="form-group">
                 <label asp-for="NumbersOfFloors" class="control-label"></label>
                 <input asp-for="NumbersOfFloors" class="form-control" />
                 <span asp-validation-for="NumbersOfFloors" class="text-danger"></span>
             </div>
+
+
+            <div class="form-group">
+                <label asp-for="Street.District.CityId" class="control-label"></label>
+                <select id="CityId" asp-for="Street.District.CityId" class="form-control" asp-items="ViewBag.CityId"></select>
+            </div>
+
+            <div class="form-group">
+                <label asp-for="Street.DistrictId" class="control-label"></label>
+                <select id="DistrictId" asp-for="Street.DistrictId" class="form-control" asp-items="ViewBag.DistrictId"></select>
+            </div>
+
             <div class="form-group">
                 <label asp-for="StreetId" class="control-label"></label>
-                <select asp-for="StreetId" class="form-control" asp-items="ViewBag.StreetId"></select>
-                <span asp-validation-for="StreetId" class="text-danger"></span>
+                <select id="StreetId" asp-for="StreetId" class="form-control" asp-items="ViewBag.StreetId"></select>
             </div>
+
+
+
             <div class="form-group">
                 <input type="submit" value="Сохранить" class="btn btn-primary" />
             </div>
@@ -45,5 +62,66 @@
 </div>
 
 @section Scripts {
-    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+
+
+    <script>
+
+
+        $(document).ready(function () {
+            // Сохраняем изначальные значения для районов и улиц
+            var originalDistricts = $('#DistrictId').html();
+            var originalStreets = $('#StreetId').html();
+
+            // Устанавливаем выбранные значения из модели
+            $('#CityId').val('@Model.Street.District.CityId');
+            $('#DistrictId').val('@Model.Street.DistrictId');
+            $('#StreetId').val('@Model.StreetId');
+
+            $('#CityId').change(function () {
+                var cityId = $(this).val();
+                $.ajax({
+                    type: 'GET',
+                    url: '/api/location/districts/' + cityId,
+                    success: function (data) {
+                        var districtsDropdown = $('#DistrictId');
+                        districtsDropdown.empty();
+                        $.each(data, function (i, district) {
+                            districtsDropdown.append($('<option/>').val(district.idDistrict).text(district.nameDistrict));
+                        });
+
+                        // Сброс выбранного района и улиц при изменении города
+                        $('#DistrictId').val('');
+                        $('#StreetId').empty();
+                    }
+                });
+            });
+
+            $('#DistrictId').change(function () {
+                var districtId = $(this).val();
+                console.log('Selected District ID:', districtId);
+                $.ajax({
+                    type: 'GET',
+                    url: '/api/location/streets/' + districtId,
+                    success: function (data) {
+                        console.log('Received data:', data);
+                        var streetsDropdown = $('#StreetId');
+                        streetsDropdown.empty();
+                        $.each(data, function (i, street) {
+                            streetsDropdown.append($('<option/>').val(street.idStreet).text(street.nameStreet));
+                        });
+                    }
+                });
+            });
+        });
+
+
+
+    </script>
+
+
+
 }
+

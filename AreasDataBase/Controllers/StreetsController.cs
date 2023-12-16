@@ -129,6 +129,9 @@ namespace AreasDataBase.Controllers
                 return RedirectToAction(nameof(Index));
             }
             ViewData["DistrictId"] = new SelectList(_context.District, "IdDistrict", "NameDistrict", street.DistrictId);
+            ViewData["CityId"] = new SelectList(_context.City, "IdCity", "NameCity", street.District.CityId);
+
+
             return View(street);
         }
 
@@ -184,6 +187,7 @@ namespace AreasDataBase.Controllers
                 return RedirectToAction(nameof(Index));
             }
             ViewData["DistrictId"] = new SelectList(_context.District, "IdDistrict", "NameDistrict", street.DistrictId);
+            ViewData["CityId"] = new SelectList(_context.City, "IdCity", "NameCity", street.District.CityId);
             return View(street);
         }
 
