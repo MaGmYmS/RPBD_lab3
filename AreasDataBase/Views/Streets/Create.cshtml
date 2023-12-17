@@ -52,6 +52,9 @@
                 loadDistricts(selectedCityId);
             });
 
+            // Сбросить выбор города при загрузке формы
+            $("#cityDropdown").val('');
+
             // Загрузить районы при загрузке формы, если город уже выбран
             var selectedCityId = $("#cityDropdown").val();
             if (selectedCityId) {
@@ -70,6 +73,7 @@
                 });
             }
         });
+
 
     </script>
 }

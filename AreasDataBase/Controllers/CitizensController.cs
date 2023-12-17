@@ -27,8 +27,17 @@ namespace AreasDataBase.Controllers
             ViewData["DateOfBirthSortParam"] = sortOrder == "dateOfBirth" ? "dateOfBirth_desc" : "dateOfBirth";
             ViewData["GenderSortParam"] = sortOrder == "gender" ? "gender_desc" : "gender";
             ViewData["ApartmentSortParam"] = sortOrder == "apartment" ? "apartment_desc" : "apartment";
+            ViewData["CitySortParam"] = sortOrder == "city" ? "city_desc" : "city";
+            ViewData["DistrictSortParam"] = sortOrder == "district" ? "district_desc" : "district";
+            ViewData["StreetSortParam"] = sortOrder == "street" ? "street_desc" : "street";
+            ViewData["HouseNumberSortParam"] = sortOrder == "houseNumber" ? "houseNumber_desc" : "houseNumber";
 
-            IQueryable<Citizen> citizens = _context.Citizen.Include(a => a.Apartment);
+            IQueryable<Citizen> citizens = _context.Citizen
+                 .Include(a => a.Apartment)
+                 .ThenInclude(a => a.ResidentialBuilding)
+                 .ThenInclude(rb => rb.Street)
+                 .ThenInclude(s => s.District)
+                 .ThenInclude(d => d.City);
 
             switch (sortOrder)
             {
@@ -65,6 +74,30 @@ namespace AreasDataBase.Controllers
                 case "apartment_desc":
                     citizens = citizens.OrderByDescending(c => c.Apartment.ApartmentNumber);
                     break;
+                case "city":
+                    citizens = citizens.OrderBy(c => c.Apartment.ResidentialBuilding.Street.District.City.NameCity);
+                    break;
+                case "city_desc":
+                    citizens = citizens.OrderByDescending(c => c.Apartment.ResidentialBuilding.Street.District.City.NameCity);
+                    break;
+                case "district":
+                    citizens = citizens.OrderBy(c => c.Apartment.ResidentialBuilding.Street.District.NameDistrict);
+                    break;
+                case "district_desc":
+                    citizens = citizens.OrderByDescending(c => c.Apartment.ResidentialBuilding.Street.District.NameDistrict);
+                    break;
+                case "street":
+                    citizens = citizens.OrderBy(c => c.Apartment.ResidentialBuilding.Street.NameStreet);
+                    break;
+                case "street_desc":
+                    citizens = citizens.OrderByDescending(c => c.Apartment.ResidentialBuilding.Street.NameStreet);
+                    break;
+                case "houseNumber":
+                    citizens = citizens.OrderBy(c => c.Apartment.ResidentialBuilding.HouseNumber);
+                    break;
+                case "houseNumber_desc":
+                    citizens = citizens.OrderByDescending(c => c.Apartment.ResidentialBuilding.HouseNumber);
+                    break;
                 default:
                     citizens = citizens.OrderBy(c => c.FullName);
                     break;
@@ -72,17 +105,16 @@ namespace AreasDataBase.Controllers
 
             if (!String.IsNullOrEmpty(searchString))
             {
-                // Используйте выбранный столбец для поиска
                 switch (searchColumn)
                 {
                     case "fullName":
                         citizens = citizens.Where(s => s.FullName.ToLower().Contains(searchString.ToLower()));
                         break;
                     case "passportData":
-                        citizens = citizens.Where(s => s.PassportData.ToString().ToLower().Contains(searchString.ToLower()));
+                        citizens = citizens.Where(s => s.PassportData.ToString().Contains(searchString));
                         break;
                     case "phoneNumber":
-                        citizens = citizens.Where(s => s.PhoneNumber.ToString().ToLower().Contains(searchString.ToLower()));
+                        citizens = citizens.Where(s => s.PhoneNumber.ToString().Contains(searchString));
                         break;
                     case "dateOfBirth":
                         citizens = citizens.Where(s => s.DateOfBirth.ToString().Contains(searchString.ToLower()));
@@ -91,18 +123,28 @@ namespace AreasDataBase.Controllers
                         citizens = citizens.Where(s => s.Gender.ToString().ToLower().Contains(searchString.ToLower()));
                         break;
                     case "apartmentNumber":
-                        citizens = citizens.Where(s => s.Apartment.ApartmentNumber.ToString().Contains(searchString.ToLower()));
+                        citizens = citizens.Where(s => s.Apartment.ApartmentNumber.ToString().Contains(searchString));
                         break;
-                        // Добавьте другие case для остальных столбцов, если необходимо
+                    case "city":
+                        citizens = citizens.AsEnumerable().Where(s => s.Apartment.ResidentialBuilding.Street.District.City.NameCity.ToLower().Contains(searchString.ToLower())).AsQueryable();
+                        break;
+                    case "district":
+                        citizens = citizens.AsEnumerable().Where(s => s.Apartment.ResidentialBuilding.Street.District.NameDistrict.ToLower().Contains(searchString.ToLower())).AsQueryable();
+                        break;
+                    case "street":
+                        citizens = citizens.AsEnumerable().Where(s => s.Apartment.ResidentialBuilding.Street.NameStreet.ToLower().Contains(searchString.ToLower())).AsQueryable();
+                        break;
+                    case "houseNumber":
+                        citizens = citizens.AsEnumerable().Where(s => s.Apartment.ResidentialBuilding.HouseNumber.ToString().Contains(searchString)).AsQueryable();
+                        break;
                 }
+
             }
 
             return View(await citizens.ToListAsync());
         }
 
 
-
-        // GET: Citizens/Details/5
         public async Task<IActionResult> Details(int? id)
         {
             if (id == null)
@@ -121,16 +163,18 @@ namespace AreasDataBase.Controllers
             return View(citizen);
         }
 
-        // GET: Citizens/Create
         public IActionResult Create()
         {
             ViewData["ApartmentId"] = new SelectList(_context.Apartment, "IdApartment", "ApartmentNumber");
+            ViewData["CityId"] = new SelectList(_context.City, "IdCity", "NameCity");
+            ViewData["DistrictId"] = new SelectList(_context.District, "IdDistrict", "NameDistrict");
+            ViewData["StreetId"] = new SelectList(_context.Street, "IdStreet", "NameStreet");
+            ViewData["ResidentialBuildingId"] = new SelectList(_context.ResidentialBuilding, "IdResidentialBuilding", "HouseNumber");
+
             return View();
         }
 
-        // POST: Citizens/Create
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
+
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create([Bind("IdCitizen,FullName,PassportData,PhoneNumber,DateOfBirth,Gender,ApartmentId")] Citizen citizen)
@@ -142,10 +186,13 @@ namespace AreasDataBase.Controllers
                 return RedirectToAction(nameof(Index));
             }
             ViewData["ApartmentId"] = new SelectList(_context.Apartment, "IdApartment", "ApartmentNumber", citizen.ApartmentId);
+            ViewData["CityId"] = new SelectList(_context.City, "IdCity", "NameCity");
+            ViewData["DistrictId"] = new SelectList(_context.District, "IdDistrict", "NameDistrict");
+            ViewData["StreetId"] = new SelectList(_context.Street, "IdStreet", "NameStreet");
+            ViewData["ResidentialBuildingId"] = new SelectList(_context.ResidentialBuilding, "IdResidentialBuilding", "HouseNumber");
             return View(citizen);
         }
 
-        // GET: Citizens/Edit/5
         public async Task<IActionResult> Edit(int? id)
         {
             if (id == null)
@@ -153,18 +200,29 @@ namespace AreasDataBase.Controllers
                 return NotFound();
             }
 
-            var citizen = await _context.Citizen.FindAsync(id);
+            var citizen = await _context.Citizen
+                .Include(c => c.Apartment)
+                .ThenInclude(a => a.ResidentialBuilding)
+                .ThenInclude(rb => rb.Street)
+                .ThenInclude(s => s.District)
+                .ThenInclude(d => d.City)
+                .FirstOrDefaultAsync(c => c.IdCitizen == id);
+
             if (citizen == null)
             {
                 return NotFound();
             }
+
+            // Загрузка списков для дропдаунов
+            ViewData["CityId"] = new SelectList(_context.City, "IdCity", "NameCity", citizen?.Apartment?.ResidentialBuilding?.Street?.District?.CityId);
+            ViewData["DistrictId"] = new SelectList(_context.District, "IdDistrict", "NameDistrict", citizen?.Apartment?.ResidentialBuilding?.Street?.DistrictId);
+            ViewData["StreetId"] = new SelectList(_context.Street, "IdStreet", "NameStreet", citizen?.Apartment?.ResidentialBuilding?.StreetId);
+            ViewData["ResidentialBuildingId"] = new SelectList(_context.ResidentialBuilding, "IdResidentialBuilding", "HouseNumber", citizen?.Apartment?.ResidentialBuildingId);
             ViewData["ApartmentId"] = new SelectList(_context.Apartment, "IdApartment", "ApartmentNumber", citizen.ApartmentId);
+
             return View(citizen);
         }
 
-        // POST: Citizens/Edit/5
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(int id, [Bind("IdCitizen,FullName,PassportData,PhoneNumber,DateOfBirth,Gender,ApartmentId")] Citizen citizen)
@@ -194,9 +252,17 @@ namespace AreasDataBase.Controllers
                 }
                 return RedirectToAction(nameof(Index));
             }
+
+            // Загрузка списков для дропдаунов в случае ошибки валидации
+            ViewData["CityId"] = new SelectList(_context.City, "IdCity", "NameCity", citizen?.Apartment?.ResidentialBuilding?.Street?.District?.CityId);
+            ViewData["DistrictId"] = new SelectList(_context.District, "IdDistrict", "NameDistrict", citizen?.Apartment?.ResidentialBuilding?.Street?.DistrictId);
+            ViewData["StreetId"] = new SelectList(_context.Street, "IdStreet", "NameStreet", citizen?.Apartment?.ResidentialBuilding?.StreetId);
+            ViewData["ResidentialBuildingId"] = new SelectList(_context.ResidentialBuilding, "IdResidentialBuilding", "HouseNumber", citizen?.Apartment?.ResidentialBuildingId);
             ViewData["ApartmentId"] = new SelectList(_context.Apartment, "IdApartment", "ApartmentNumber", citizen.ApartmentId);
+
             return View(citizen);
         }
+
 
         // GET: Citizens/Delete/5
         public async Task<IActionResult> Delete(int? id)

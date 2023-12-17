@@ -38,11 +38,33 @@
                     <input class="form-check-input" asp-for="Gender" /> @Html.DisplayNameFor(model => model.Gender)
                 </label>
             </div>
+
+            <div class="form-group">
+                <label asp-for="Apartment.ResidentialBuilding.Street.District.CityId" class="control-label"></label>
+                <select asp-for="Apartment.ResidentialBuilding.Street.District.CityId" class="form-control" asp-items="ViewBag.CityId"></select>
+                <span asp-validation-for="Apartment.ResidentialBuilding.Street.District.CityId" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Apartment.ResidentialBuilding.Street.DistrictId" class="control-label"></label>
+                <select asp-for="Apartment.ResidentialBuilding.Street.DistrictId" class="form-control" asp-items="ViewBag.DistrictId"></select>
+                <span asp-validation-for="Apartment.ResidentialBuilding.Street.DistrictId" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Apartment.ResidentialBuilding.StreetId" class="control-label"></label>
+                <select asp-for="Apartment.ResidentialBuilding.StreetId" class="form-control" asp-items="ViewBag.StreetId"></select>
+                <span asp-validation-for="Apartment.ResidentialBuilding.StreetId" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Apartment.ResidentialBuildingId" class="control-label"></label>
+                <select asp-for="Apartment.ResidentialBuildingId" class="form-control" asp-items="ViewBag.ResidentialBuildingId"></select>
+                <span asp-validation-for="Apartment.ResidentialBuildingId" class="text-danger"></span>
+            </div>
             <div class="form-group">
                 <label asp-for="ApartmentId" class="control-label"></label>
                 <select asp-for="ApartmentId" class="form-control" asp-items="ViewBag.ApartmentId"></select>
                 <span asp-validation-for="ApartmentId" class="text-danger"></span>
             </div>
+
             <div class="form-group">
                 <input type="submit" value="Сохранить" class="btn btn-primary" />
             </div>
@@ -58,4 +80,253 @@
     @{
         await Html.RenderPartialAsync("_ValidationScriptsPartial");
     }
+
+
+@*     <script>
+        $(document).ready(function () {
+            // Сохраняем изначальные значения для города, районов, улиц, домов и квартир
+            var originalCity = $('#Apartment_ResidentialBuilding_Street_District_CityId').html();
+            var originalDistricts = $('#Apartment_ResidentialBuilding_Street_DistrictId').html();
+            var originalStreets = $('#Apartment_ResidentialBuilding_StreetId').html();
+            var originalHouses = $('#Apartment_ResidentialBuildingId').html();
+            var originalApartments = $('#ApartmentId').html();
+
+            var selectedCity = '@Model?.Apartment?.ResidentialBuilding?.Street?.District?.CityId';
+            var selectedDistrict = '@Model?.Apartment?.ResidentialBuilding?.Street?.DistrictId';
+            var selectedStreet = '@Model?.Apartment?.ResidentialBuilding?.StreetId';
+            var selectedHouse = '@Model?.Apartment?.ResidentialBuildingId';
+            var selectedApartment = '@Model.ApartmentId'
+
+            $('#Apartment_ResidentialBuilding_Street_District_CityId').change(function () {
+                var cityId = $(this).val();
+                $.ajax({
+                    type: 'GET',
+                    url: '/api/location/districts/' + cityId,
+                    success: function (data) {
+                        var districtsDropdown = $('#Apartment_ResidentialBuilding_Street_DistrictId');
+                        districtsDropdown.empty();
+                        $.each(data, function (i, district) {
+                            districtsDropdown.append($('<option/>').val(district.idDistrict).text(district.nameDistrict));
+                        });
+
+                        // Сброс выбранного района, улицы, дома и квартиры при изменении города
+                        $('#Apartment_ResidentialBuilding_Street_DistrictId').val('');
+                        $('#Apartment_ResidentialBuilding_StreetId').empty();
+                        $('#Apartment_ResidentialBuildingId').empty();
+                        $('#ApartmentId').empty();
+                    }
+                });
+            });
+
+            $('#Apartment_ResidentialBuilding_Street_DistrictId').change(function () {
+                var districtId = $(this).val();
+                $.ajax({
+                    type: 'GET',
+                    url: '/api/location/streets/' + districtId,
+                    success: function (data) {
+                        var streetsDropdown = $('#Apartment_ResidentialBuilding_StreetId');
+                        streetsDropdown.empty();
+                        $.each(data, function (i, street) {
+                            streetsDropdown.append($('<option/>').val(street.idStreet).text(street.nameStreet));
+                        });
+
+                        // Сброс выбранной улицы, дома и квартиры при изменении района
+                        $('#Apartment_ResidentialBuilding_StreetId').val('');
+                        $('#Apartment_ResidentialBuildingId').empty();
+                        $('#ApartmentId').empty();
+                    }
+                });
+            });
+
+            $('#Apartment_ResidentialBuilding_StreetId').change(function () {
+                var streetId = $(this).val();
+                $.ajax({
+                    type: 'GET',
+                    url: '/api/location/houses/' + streetId,
+                    success: function (data) {
+                        var housesDropdown = $('#Apartment_ResidentialBuildingId');
+                        housesDropdown.empty();
+                        $.each(data, function (i, house) {
+                            housesDropdown.append($('<option/>').val(house.idResidentialBuilding).text(house.houseNumber));
+                        });
+
+                        // Сброс выбранного дома и квартиры при изменении улицы
+                        $('#Apartment_ResidentialBuildingId').val('');
+                        $('#ApartmentId').empty();
+                    }
+                });
+            });
+
+            $('#Apartment_ResidentialBuildingId').change(function () {
+                var residentialBuildingId = $(this).val();
+                $.ajax({
+                    type: 'GET',
+                    url: '/api/location/apartments/' + residentialBuildingId,
+                    success: function (data) {
+                        var apartmentsDropdown = $('#ApartmentId');
+                        apartmentsDropdown.empty();
+                        $.each(data, function (i, apartment) {
+                            apartmentsDropdown.append($('<option/>').val(apartment.idApartment).text(apartment.apartmentNumber));
+                        });
+                    }
+                });
+            });
+        });
+    </script> *@
+
+    <script>
+        $(document).ready(function () {
+            // Сохраняем изначальные значения для города, районов, улиц, домов и квартир
+            var originalCity = $('#Apartment_ResidentialBuilding_Street_District_CityId').html();
+            var originalDistricts = $('#Apartment_ResidentialBuilding_Street_DistrictId').html();
+            var originalStreets = $('#Apartment_ResidentialBuilding_StreetId').html();
+            var originalHouses = $('#Apartment_ResidentialBuildingId').html();
+            var originalApartments = $('#ApartmentId').html();
+
+            var selectedCity = '@Model?.Apartment?.ResidentialBuilding?.Street?.District?.CityId';
+            var selectedDistrict = '@Model?.Apartment?.ResidentialBuilding?.Street?.DistrictId';
+            var selectedStreet = '@Model?.Apartment?.ResidentialBuilding?.StreetId';
+            var selectedHouse = '@Model?.Apartment?.ResidentialBuildingId';
+            var selectedApartment = '@Model.ApartmentId'
+
+            $('#Apartment_ResidentialBuilding_Street_District_CityId').val(selectedCity);
+
+            // Загрузка списков при открытии формы редактирования
+            $.ajax({
+                type: 'GET',
+                url: '/api/location/districts/' + selectedCity,
+                success: function (data) {
+                    var districtsDropdown = $('#Apartment_ResidentialBuilding_Street_DistrictId');
+                    districtsDropdown.empty();
+                    $.each(data, function (i, district) {
+                        districtsDropdown.append($('<option/>').val(district.idDistrict).text(district.nameDistrict));
+                    });
+
+                    // Установка выбранного района при открытии формы
+                    $('#Apartment_ResidentialBuilding_Street_DistrictId').val(selectedDistrict);
+                }
+            });
+
+            $.ajax({
+                type: 'GET',
+                url: '/api/location/streets/' + selectedDistrict,
+                success: function (data) {
+                    var streetsDropdown = $('#Apartment_ResidentialBuilding_StreetId');
+                    streetsDropdown.empty();
+                    $.each(data, function (i, street) {
+                        streetsDropdown.append($('<option/>').val(street.idStreet).text(street.nameStreet));
+                    });
+
+                    // Установка выбранной улицы при открытии формы
+                    $('#Apartment_ResidentialBuilding_StreetId').val(selectedStreet);
+                }
+            });
+
+            $.ajax({
+                type: 'GET',
+                url: '/api/location/houses/' + selectedStreet,
+                success: function (data) {
+                    var housesDropdown = $('#Apartment_ResidentialBuildingId');
+                    housesDropdown.empty();
+                    $.each(data, function (i, house) {
+                        housesDropdown.append($('<option/>').val(house.idResidentialBuilding).text(house.houseNumber));
+                    });
+
+                    // Установка выбранного дома при открытии формы
+                    $('#Apartment_ResidentialBuildingId').val(selectedHouse);
+                }
+            });
+
+            $.ajax({
+                type: 'GET',
+                url: '/api/location/apartments/' + selectedHouse,
+                success: function (data) {
+                    var apartmentsDropdown = $('#ApartmentId');
+                    apartmentsDropdown.empty();
+                    $.each(data, function (i, apartment) {
+                        apartmentsDropdown.append($('<option/>').val(apartment.idApartment).text(apartment.apartmentNumber));
+                    });
+
+                    // Установка выбранной квартиры при открытии формы
+                    $('#ApartmentId').val(selectedApartment);
+                }
+            });
+
+            $('#Apartment_ResidentialBuilding_Street_District_CityId').change(function () {
+                var cityId = $(this).val();
+                $.ajax({
+                    type: 'GET',
+                    url: '/api/location/districts/' + cityId,
+                    success: function (data) {
+                        var districtsDropdown = $('#Apartment_ResidentialBuilding_Street_DistrictId');
+                        districtsDropdown.empty();
+                        $.each(data, function (i, district) {
+                            districtsDropdown.append($('<option/>').val(district.idDistrict).text(district.nameDistrict));
+                        });
+
+                        // Сброс выбранного района, улицы, дома и квартиры при изменении города
+                        $('#Apartment_ResidentialBuilding_Street_DistrictId').val('');
+                        $('#Apartment_ResidentialBuilding_StreetId').empty();
+                        $('#Apartment_ResidentialBuildingId').empty();
+                        $('#ApartmentId').empty();
+                    }
+                });
+            });
+
+            $('#Apartment_ResidentialBuilding_Street_DistrictId').change(function () {
+                var districtId = $(this).val();
+                $.ajax({
+                    type: 'GET',
+                    url: '/api/location/streets/' + districtId,
+                    success: function (data) {
+                        var streetsDropdown = $('#Apartment_ResidentialBuilding_StreetId');
+                        streetsDropdown.empty();
+                        $.each(data, function (i, street) {
+                            streetsDropdown.append($('<option/>').val(street.idStreet).text(street.nameStreet));
+                        });
+
+                        // Сброс выбранной улицы, дома и квартиры при изменении района
+                        $('#Apartment_ResidentialBuilding_StreetId').val('');
+                        $('#Apartment_ResidentialBuildingId').empty();
+                        $('#ApartmentId').empty();
+                    }
+                });
+            });
+
+            $('#Apartment_ResidentialBuilding_StreetId').change(function () {
+                var streetId = $(this).val();
+                $.ajax({
+                    type: 'GET',
+                    url: '/api/location/houses/' + streetId,
+                    success: function (data) {
+                        var housesDropdown = $('#Apartment_ResidentialBuildingId');
+                        housesDropdown.empty();
+                        $.each(data, function (i, house) {
+                            housesDropdown.append($('<option/>').val(house.idResidentialBuilding).text(house.houseNumber));
+                        });
+
+                        // Сброс выбранного дома и квартиры при изменении улицы
+                        $('#Apartment_ResidentialBuildingId').val('');
+                        $('#ApartmentId').empty();
+                    }
+                });
+            });
+
+            $('#Apartment_ResidentialBuildingId').change(function () {
+                var residentialBuildingId = $(this).val();
+                $.ajax({
+                    type: 'GET',
+                    url: '/api/location/apartments/' + residentialBuildingId,
+                    success: function (data) {
+                        var apartmentsDropdown = $('#ApartmentId');
+                        apartmentsDropdown.empty();
+                        $.each(data, function (i, apartment) {
+                            apartmentsDropdown.append($('<option/>').val(apartment.idApartment).text(apartment.apartmentNumber));
+                        });
+                    }
+                });
+            });
+        });
+    </script>
+
 }

@@ -43,4 +43,15 @@ public class LocationApiController : Controller
         return Ok(houses);
     }
 
+    [HttpGet("apartments/{residentialBuildingId}")]
+    public IActionResult GetApartments(int residentialBuildingId)
+    {
+        var apartments = _context.Apartment
+            .Where(a => a.ResidentialBuildingId == residentialBuildingId)
+            .Select(a => new { a.IdApartment, a.ApartmentNumber })
+            .ToList();
+
+        return Ok(apartments);
+    }
+
 }
