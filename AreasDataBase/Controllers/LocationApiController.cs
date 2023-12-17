@@ -31,4 +31,16 @@ public class LocationApiController : Controller
         var streets = _context.Street.Where(s => s.DistrictId == districtId).ToList();
         return Ok(streets);
     }
+
+    [HttpGet("houses/{streetId}")]
+    public IActionResult GetHouses(int streetId)
+    {
+        var houses = _context.ResidentialBuilding
+            .Where(rb => rb.StreetId == streetId)
+            .Select(rb => new { rb.IdResidentialBuilding, rb.HouseNumber })
+            .ToList();
+
+        return Ok(houses);
+    }
+
 }

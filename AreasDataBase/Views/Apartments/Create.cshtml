@@ -27,10 +27,27 @@
                 <input asp-for="Area" class="form-control" />
                 <span asp-validation-for="Area" class="text-danger"></span>
             </div>
+
+            <div class="form-group">
+                <label asp-for="ResidentialBuilding.Street.District.CityId" class="control-label">Город</label>
+                <select asp-for="ResidentialBuilding.Street.District.CityId" class="form-control" asp-items="ViewBag.CityId"></select>
+            </div>
+
+            <div class="form-group">
+                <label asp-for="ResidentialBuilding.Street.DistrictId" class="control-label">Район</label>
+                <select asp-for="ResidentialBuilding.Street.DistrictId" class="form-control" asp-items="ViewBag.DistrictId"></select>
+            </div>
+
+            <div class="form-group">
+                <label asp-for="ResidentialBuilding.StreetId" class="control-label">Улица</label>
+                <select asp-for="ResidentialBuilding.StreetId" class="form-control" asp-items="ViewBag.StreetId"></select>
+            </div>
+
             <div class="form-group">
                 <label asp-for="ResidentialBuildingId" class="control-label">Номер дома</label>
                 <select asp-for="ResidentialBuildingId" class="form-control" asp-items="ViewBag.ResidentialBuildingId"></select>
             </div>
+
             <div class="form-group">
                 <input type="submit" value="Создать" class="btn btn-primary" />
             </div>
@@ -42,8 +59,221 @@
     <a asp-action="Index">Вернуться к списку</a>
 </div>
 
-@section Scripts {
+
+
+@section scripts {
     @{
         await Html.RenderPartialAsync("_ValidationScriptsPartial");
     }
+
+
+    <script>
+        // $(function () {
+        //     resetDropdowns();
+
+        //     // Обработчик изменения города
+        //     $('#ResidentialBuilding_Street_District_CityId').change(function () {
+        //         resetDropdowns();
+
+        //         var cityId = $(this).val();
+        //         if (cityId) {
+        //             // Загрузка районов при изменении города
+        //             loadDistricts(cityId);
+        //         }
+        //     });
+
+        //     // Обработчик изменения района
+        //     $('#ResidentialBuilding_Street_DistrictId').change(function () {
+        //         resetStreets();
+        //         resetHouses();
+
+        //         var districtId = $(this).val();
+        //         if (districtId) {
+        //             // Загрузка улиц при изменении района
+        //             loadStreets(districtId);
+        //         }
+        //     });
+
+        //     // Обработчик изменения улицы
+        //     $('#ResidentialBuilding_StreetId').change(function () {
+        //         resetHouses();
+
+        //         var streetId = $(this).val();
+        //         if (streetId) {
+        //             // Загрузка номеров домов при изменении улицы
+        //             loadHouses(streetId);
+        //         }
+        //     });
+
+        //     // При отправке формы сохраняем значения в localStorage
+        //     $("form").submit(function () {
+        //         localStorage.setItem("ResidentialBuilding_Street_District_CityId", $('#ResidentialBuilding_Street_District_CityId').val());
+        //         localStorage.setItem("ResidentialBuilding_Street_DistrictId", $('#ResidentialBuilding_Street_DistrictId').val());
+        //         localStorage.setItem("ResidentialBuilding_StreetId", $('#ResidentialBuilding_StreetId').val());
+        //         localStorage.setItem("ResidentialBuildingId", $('#ResidentialBuildingId').val());
+        //     });
+
+        //     // При загрузке страницы восстанавливаем значения из localStorage
+        //     var savedCityId = localStorage.getItem("ResidentialBuilding_Street_District_CityId");
+        //     var savedDistrictId = localStorage.getItem("ResidentialBuilding_Street_DistrictId");
+        //     var savedStreetId = localStorage.getItem("ResidentialBuilding_StreetId");
+        //     var savedBuildingId = localStorage.getItem("ResidentialBuildingId");
+
+        //     if (savedCityId) {
+        //         // Загрузка районов при восстановлении города
+        //         loadDistricts(savedCityId);
+        //         $('#ResidentialBuilding_Street_District_CityId').val(savedCityId).trigger('change');
+        //     }
+
+        //     if (savedDistrictId) {
+        //         // Загрузка улиц при восстановлении района
+        //         loadStreets(savedDistrictId);
+        //         $('#ResidentialBuilding_Street_DistrictId').val(savedDistrictId).trigger('change');
+        //     }
+
+        //     if (savedStreetId) {
+        //         // Загрузка номеров домов при восстановлении улицы
+        //         loadHouses(savedStreetId);
+        //         $('#ResidentialBuilding_StreetId').val(savedStreetId).trigger('change');
+        //     }
+
+        //     if (savedBuildingId) {
+        //         $('#ResidentialBuildingId').val(savedBuildingId);
+        //     }
+
+        //     function resetDropdowns() {
+        //         $('#ResidentialBuilding_Street_DistrictId').html('<option value=""></option>').val('');
+        //         $('#ResidentialBuilding_StreetId').html('<option value=""></option>').val('');
+        //         resetHouses();
+        //     }
+
+        //     function resetStreets() {
+        //         $('#ResidentialBuilding_StreetId').html('<option value=""></option>').val('');
+        //     }
+
+        //     function resetHouses() {
+        //         $('#ResidentialBuildingId').html('<option value=""></option>').val('');
+        //     }
+
+        //     function loadDistricts(cityId) {
+        //         // Загрузка районов при изменении города
+        //         $.ajax({
+        //             url: '/api/location/districts/' + cityId,
+        //             type: 'GET',
+        //             success: function (data) {
+        //                 $('#ResidentialBuilding_Street_DistrictId').html('<option value=""></option>');
+        //                 $.each(data, function (i, district) {
+        //                     $('#ResidentialBuilding_Street_DistrictId').append($('<option>').text(district.nameDistrict).attr('value', district.idDistrict));
+        //                 });
+        //             }
+        //         });
+        //     }
+
+        //     function loadStreets(districtId) {
+        //         // Загрузка улиц при изменении района
+        //         $.ajax({
+        //             url: '/api/location/streets/' + districtId,
+        //             type: 'GET',
+        //             success: function (data) {
+        //                 $('#ResidentialBuilding_StreetId').html('<option value=""></option>');
+        //                 $.each(data, function (i, street) {
+        //                     $('#ResidentialBuilding_StreetId').append($('<option>').text(street.nameStreet).attr('value', street.idStreet));
+        //                 });
+        //             }
+        //         });
+        //     }
+
+        //     function loadHouses(streetId) {
+        //         // Загрузка номеров домов при изменении улицы
+        //         $.ajax({
+        //             url: '/api/location/houses/' + streetId,
+        //             type: 'GET',
+        //             success: function (data) {
+        //                 $('#ResidentialBuildingId').html('<option value=""></option>');
+        //                 $.each(data, function (i, house) {
+        //                     $('#ResidentialBuildingId').append($('<option>').text(house.houseNumber).attr('value', house.idResidentialBuilding));
+        //                 });
+        //             }
+        //         });
+        //     }
+
+        // });
+
+
+
+        $(document).ready(function () {
+            // Сохраняем изначальные значения для города, районов, улиц и домов
+            var originalCity = $('#ResidentialBuilding_Street_District_CityId').html();
+            var originalDistricts = $('#ResidentialBuilding_Street_DistrictId').html();
+            var originalStreets = $('#ResidentialBuilding_StreetId').html();
+            var originalHouses = $('#ResidentialBuildingId').html();
+
+            // Зануляем списки при открытии формы добавления
+            $('#ResidentialBuilding_Street_District_CityId').val('');
+            $('#ResidentialBuilding_Street_DistrictId').html('<option value=""></option>').val('');
+            $('#ResidentialBuilding_StreetId').html('<option value=""></option>').val('');
+            $('#ResidentialBuildingId').html('<option value=""></option>').val('');
+
+            $('#ResidentialBuilding_Street_District_CityId').change(function () {
+                var cityId = $(this).val();
+                $.ajax({
+                    type: 'GET',
+                    url: '/api/location/districts/' + cityId,
+                    success: function (data) {
+                        var districtsDropdown = $('#ResidentialBuilding_Street_DistrictId');
+                        districtsDropdown.empty();
+                        $.each(data, function (i, district) {
+                            districtsDropdown.append($('<option/>').val(district.idDistrict).text(district.nameDistrict));
+                        });
+
+                        // Сброс выбранного района, улицы и дома при изменении города
+                        $('#ResidentialBuilding_Street_DistrictId').val('');
+                        $('#ResidentialBuilding_StreetId').empty();
+                        $('#ResidentialBuildingId').empty();
+                    }
+                });
+            });
+
+            $('#ResidentialBuilding_Street_DistrictId').change(function () {
+                var districtId = $(this).val();
+                $.ajax({
+                    type: 'GET',
+                    url: '/api/location/streets/' + districtId,
+                    success: function (data) {
+                        var streetsDropdown = $('#ResidentialBuilding_StreetId');
+                        streetsDropdown.empty();
+                        $.each(data, function (i, street) {
+                            streetsDropdown.append($('<option/>').val(street.idStreet).text(street.nameStreet));
+                        });
+
+                        // Сброс выбранной улицы и дома при изменении района
+                        $('#ResidentialBuilding_StreetId').val('');
+                        $('#ResidentialBuildingId').empty();
+                    }
+                });
+            });
+
+            $('#ResidentialBuilding_StreetId').change(function () {
+                var streetId = $(this).val();
+                $.ajax({
+                    type: 'GET',
+                    url: '/api/location/houses/' + streetId,
+                    success: function (data) {
+                        var housesDropdown = $('#ResidentialBuildingId');
+                        housesDropdown.empty();
+                        $.each(data, function (i, house) {
+                            housesDropdown.append($('<option/>').val(house.idResidentialBuilding).text(house.houseNumber));
+                        });
+                    }
+                });
+            });
+        });
+
+    </script>
+
+
+
 }
+
+
+

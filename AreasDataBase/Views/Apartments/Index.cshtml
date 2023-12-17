@@ -20,6 +20,9 @@
             <option value="numberOfRooms">Количество комнат</option>
             <option value="area">Площадь</option>
             <option value="residentialBuilding.houseNumber">Номер дома</option>
+            <option value="residentialBuilding.Street.NameStreet">Название улицы</option>
+            <option value="residentialBuilding.Street.District.NameDistrict">Название района</option>
+            <option value="residentialBuilding.Street.District.City.NameCity">Название города</option>
         </select>
         <button type="submit" class="btn btn-primary">Поиск</button>
     </div>
@@ -39,6 +42,15 @@
             </th>
             <th>
                 <a asp-action="Index" asp-route-sortOrder="@ViewData["ResidentialBuildingSortParam"]">@Html.DisplayNameFor(model => model.ResidentialBuilding.HouseNumber)</a>
+            </th>
+            <th>
+                <a asp-action="Index" asp-route-sortOrder="@ViewData["StreetSortParam"]">@Html.DisplayNameFor(model => model.ResidentialBuilding.Street.NameStreet)</a>
+            </th>
+            <th>
+                <a asp-action="Index" asp-route-sortOrder="@ViewData["DistrictSortParam"]">@Html.DisplayNameFor(model => model.ResidentialBuilding.Street.District.NameDistrict)</a>
+            </th>
+            <th>
+                <a asp-action="Index" asp-route-sortOrder="@ViewData["CitySortParam"]">@Html.DisplayNameFor(model => model.ResidentialBuilding.Street.District.City.NameCity)</a>
             </th>
             <th></th>
         </tr>
@@ -60,8 +72,16 @@
                     @Html.DisplayFor(modelItem => item.ResidentialBuilding.HouseNumber)
                 </td>
                 <td>
+                    @Html.DisplayFor(modelItem => item.ResidentialBuilding.Street.NameStreet)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.ResidentialBuilding.Street.District.NameDistrict)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.ResidentialBuilding.Street.District.City.NameCity)
+                </td>
+                <td>
                     <a asp-action="Edit" asp-route-id="@item.IdApartment">Редактировать</a> |
-                    <a asp-action="Details" asp-route-id="@item.IdApartment">Детали</a> |
                     <a asp-action="Delete" asp-route-id="@item.IdApartment">Удалить</a>
                 </td>
             </tr>

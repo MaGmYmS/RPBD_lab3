@@ -26,8 +26,15 @@ namespace AreasDataBase.Controllers
             ViewData["NumberOfRoomsSortParam"] = sortOrder == "NumberOfRooms" ? "numberOfRooms_desc" : "NumberOfRooms";
             ViewData["AreaSortParam"] = sortOrder == "Area" ? "area_desc" : "Area";
             ViewData["ResidentialBuildingSortParam"] = sortOrder == "ResidentialBuilding" ? "residentialBuilding_desc" : "ResidentialBuilding";
+            ViewData["CitySortParam"] = sortOrder == "City" ? "city_desc" : "City";
+            ViewData["DistrictSortParam"] = sortOrder == "District" ? "district_desc" : "District";
+            ViewData["StreetSortParam"] = sortOrder == "Street" ? "street_desc" : "Street";
 
-            IQueryable<Apartment> apartmentsQuery = _context.Apartment.Include(a => a.ResidentialBuilding);
+            IQueryable<Apartment> apartmentsQuery = _context.Apartment
+                .Include(a => a.ResidentialBuilding)
+                .ThenInclude(rb => rb.Street)
+                .ThenInclude(s => s.District)
+                .ThenInclude(d => d.City);
 
             switch (sortOrder)
             {
@@ -52,6 +59,24 @@ namespace AreasDataBase.Controllers
                 case "residentialBuilding_desc":
                     apartmentsQuery = apartmentsQuery.OrderByDescending(a => a.ResidentialBuilding.HouseNumber);
                     break;
+                case "City":
+                    apartmentsQuery = apartmentsQuery.OrderBy(a => a.ResidentialBuilding.Street.District.City.NameCity);
+                    break;
+                case "city_desc":
+                    apartmentsQuery = apartmentsQuery.OrderByDescending(a => a.ResidentialBuilding.Street.District.City.NameCity);
+                    break;
+                case "District":
+                    apartmentsQuery = apartmentsQuery.OrderBy(a => a.ResidentialBuilding.Street.District.NameDistrict);
+                    break;
+                case "district_desc":
+                    apartmentsQuery = apartmentsQuery.OrderByDescending(a => a.ResidentialBuilding.Street.District.NameDistrict);
+                    break;
+                case "Street":
+                    apartmentsQuery = apartmentsQuery.OrderBy(a => a.ResidentialBuilding.Street.NameStreet);
+                    break;
+                case "street_desc":
+                    apartmentsQuery = apartmentsQuery.OrderByDescending(a => a.ResidentialBuilding.Street.NameStreet);
+                    break;
                 default:
                     apartmentsQuery = apartmentsQuery.OrderBy(a => a.ApartmentNumber);
                     break;
@@ -74,11 +99,21 @@ namespace AreasDataBase.Controllers
                     case "residentialBuilding.houseNumber":
                         apartmentsQuery = apartmentsQuery.Where(s => s.ResidentialBuilding.HouseNumber.ToLower().Contains(searchString.ToLower()));
                         break;
+                    case "residentialBuilding.Street.District.City.NameCity":
+                        apartmentsQuery = apartmentsQuery.Where(s => s.ResidentialBuilding.Street.District.City.NameCity.ToLower().Contains(searchString.ToLower()));
+                        break;
+                    case "residentialBuilding.Street.District.NameDistrict":
+                        apartmentsQuery = apartmentsQuery.Where(s => s.ResidentialBuilding.Street.District.NameDistrict.ToLower().Contains(searchString.ToLower()));
+                        break;
+                    case "residentialBuilding.Street.NameStreet":
+                        apartmentsQuery = apartmentsQuery.Where(s => s.ResidentialBuilding.Street.NameStreet.ToLower().Contains(searchString.ToLower()));
+                        break;
                 }
             }
 
             return View(await apartmentsQuery.ToListAsync());
         }
+
 
         // GET: Apartments/Details/5
         public async Task<IActionResult> Details(int? id)
@@ -99,16 +134,15 @@ namespace AreasDataBase.Controllers
             return View(apartment);
         }
 
-        // GET: Apartments/Create
         public IActionResult Create()
         {
             ViewData["ResidentialBuildingId"] = new SelectList(_context.ResidentialBuilding, "IdResidentialBuilding", "HouseNumber");
+            ViewData["CityId"] = new SelectList(_context.City, "IdCity", "NameCity");
+            ViewData["DistrictId"] = new SelectList(_context.District, "IdDistrict", "NameDistrict");
+            ViewData["StreetId"] = new SelectList(_context.Street, "IdStreet", "NameStreet");
             return View();
         }
 
-        // POST: Apartments/Create
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create([Bind("IdApartment,ApartmentNumber,NumberOfRooms,Area,ResidentialBuildingId")] Apartment apartment)
@@ -119,11 +153,16 @@ namespace AreasDataBase.Controllers
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
+
+            // При ошибке заполнения формы, обновляем также списки для города, района и улицы
             ViewData["ResidentialBuildingId"] = new SelectList(_context.ResidentialBuilding, "IdResidentialBuilding", "HouseNumber", apartment.ResidentialBuildingId);
+            ViewData["CityId"] = new SelectList(_context.City, "IdCity", "NameCity");
+            ViewData["DistrictId"] = new SelectList(_context.District, "IdDistrict", "NameDistrict");
+            ViewData["StreetId"] = new SelectList(_context.Street, "IdStreet", "NameStreet");
+
             return View(apartment);
         }
 
-        // GET: Apartments/Edit/5
         public async Task<IActionResult> Edit(int? id)
         {
             if (id == null)
@@ -136,13 +175,16 @@ namespace AreasDataBase.Controllers
             {
                 return NotFound();
             }
+
+            // Загрузка данных для списков
+            ViewData["CityId"] = new SelectList(_context.City, "IdCity", "NameCity");
+            ViewData["DistrictId"] = new SelectList(_context.District, "IdDistrict", "NameDistrict");
+            ViewData["StreetId"] = new SelectList(_context.Street, "IdStreet", "NameStreet");
             ViewData["ResidentialBuildingId"] = new SelectList(_context.ResidentialBuilding, "IdResidentialBuilding", "HouseNumber", apartment.ResidentialBuildingId);
+
             return View(apartment);
         }
 
-        // POST: Apartments/Edit/5
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(int id, [Bind("IdApartment,ApartmentNumber,NumberOfRooms,Area,ResidentialBuildingId")] Apartment apartment)
@@ -172,11 +214,17 @@ namespace AreasDataBase.Controllers
                 }
                 return RedirectToAction(nameof(Index));
             }
+
+            // Загрузка данных для списков при ошибке заполнения формы
+            ViewData["CityId"] = new SelectList(_context.City, "IdCity", "NameCity");
+            ViewData["DistrictId"] = new SelectList(_context.District, "IdDistrict", "NameDistrict");
+            ViewData["StreetId"] = new SelectList(_context.Street, "IdStreet", "NameStreet");
             ViewData["ResidentialBuildingId"] = new SelectList(_context.ResidentialBuilding, "IdResidentialBuilding", "HouseNumber", apartment.ResidentialBuildingId);
+
             return View(apartment);
         }
 
-        // GET: Apartments/Delete/5
+
         public async Task<IActionResult> Delete(int? id)
         {
             if (id == null)
