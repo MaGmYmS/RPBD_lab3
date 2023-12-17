@@ -85,8 +85,16 @@
                     @Html.DisplayFor(modelItem => item.DateOfBirth)
                 </td>
                 <td>
-                    @Html.DisplayFor(modelItem => item.Gender)
+                    @if (item.Gender == true)
+                    {
+                        <span>Мужской</span>
+                    }
+                    else
+                    {
+                        <span>Женский</span>
+                    }
                 </td>
+
                 <td>
                     @Html.DisplayFor(modelItem => item.Apartment.ResidentialBuilding.Street.District.City.NameCity)
                 </td>
