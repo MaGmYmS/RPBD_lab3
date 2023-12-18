@@ -12,21 +12,22 @@ namespace AreasDataBase.Models
 
         [Display(Name = "Номер квартиры")]
         [Required(ErrorMessage = "Значение не может быть пустым")]
-        [Range(1, int.MaxValue, ErrorMessage = "Номер квартиры превышает допустимые значения")]
+        [Range(1, 1000, ErrorMessage = "Номер квартиры должен быть больше 0 и меньше 1000")]
         [Column("apartment_number")]
         public int ApartmentNumber { get; set; }
 
         [Display(Name = "Количество комнат")]
         [Required(ErrorMessage = "Значение не может быть пустым")]
-        [Range(1, int.MaxValue, ErrorMessage = "Количество комнат должно быть больше 0")]
+        [Range(1, 100, ErrorMessage = "Количество комнат должно быть больше 0 и меньше 100")]
         [Column("num_of_rooms")]
         public int NumberOfRooms { get; set; }
 
         [Display(Name = "Площадь квартиры")]
         [Required(ErrorMessage = "Значение не может быть пустым")]
-        [Range(1, double.MaxValue, ErrorMessage = "Площадь квартиры должна быть неотрицательной")]
+        [Range(1, 2000, ErrorMessage = "Площадь квартиры должна быть неотрицательной и меньше 2000")]
         [Column("area")]
         public double Area { get; set; }
+
 
         [Required(ErrorMessage = "Значение не может быть пустым")]
         [Display(Name = "Номер дома")]

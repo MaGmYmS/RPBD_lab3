@@ -29,9 +29,11 @@
             </div>
             <div class="form-group">
                 <label asp-for="DateOfBirth" class="control-label"></label>
-                <input asp-for="DateOfBirth" class="form-control" />
+                <input asp-for="DateOfBirth" class="form-control" data-val-range-min="01.01.1800" data-val-range-max="01.01.2100" />
                 <span asp-validation-for="DateOfBirth" class="text-danger"></span>
             </div>
+
+
             <div class="form-group">
                 <label asp-for="Gender" class="control-label"></label>
                 <div>
@@ -89,6 +91,34 @@
 @section Scripts {
     @{
         await Html.RenderPartialAsync("_ValidationScriptsPartial");
+
+        <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.validate/1.19.3/jquery.validate.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.validate.unobtrusive/3.2.12/jquery.validate.unobtrusive.min.js"></script>
+
+
+        <script>
+            $.validator.methods.range = function (value, element, param) {
+                if ($(element).attr('data-val-date')) {
+                    var min = $(element).attr('data-val-range-min');
+                    var max = $(element).attr('data-val-range-max');
+                    var date = new Date(value).getTime();
+                    var minDate = new Date(min).getTime();
+                    var maxDate = new Date(max).getTime();
+                    console.log(minDate)
+                    console.log(maxDate)
+                    // Установите ограничение для даты от 1800 года до 2100 года
+                    return this.optional(element) || (date >= minDate && date <= maxDate);
+                }
+                // use the default method
+                return this.optional(element) || (value >= param[0] && value <= param[1]);
+            };
+
+            $(document).ready(function () {
+                // Установите маску для даты
+                $('#DateOfBirth').inputmask('99.99.9999');
+            });
+        </script>
 
         <script>
             $(document).ready(function () {

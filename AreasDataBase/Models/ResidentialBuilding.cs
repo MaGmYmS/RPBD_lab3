@@ -18,7 +18,7 @@ namespace AreasDataBase.Models
 
         [Required(ErrorMessage = "Значение не может быть пустым")]
         [Display(Name = "Год постройки")]
-        [Range(1800, int.MaxValue, ErrorMessage = "Год постройки должен быть не ранее 1800 года")]
+        [Range(1800, 2100, ErrorMessage = "Год постройки должен быть не ранее 1800 года и позднее 2100")]
         [Column("year_of_construction")]
         public int YearOfConstruction { get; set; }
 

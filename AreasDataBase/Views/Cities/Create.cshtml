@@ -1,4 +1,10 @@
 ﻿@model AreasDataBase.Models.City
+<head>
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.inputmask/3.3.4/jquery.inputmask.bundle.min.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.2.0/jquery.min.js"></script>
+</head>
+
 
 @{
     ViewData["Title"] = "Добавление";
@@ -19,7 +25,8 @@
             </div>
             <div class="form-group">
                 <label asp-for="PostalCode" class="control-label"></label>
-                <input asp-for="PostalCode" class="form-control" />
+                <input type="text" id="PostalCode" name="PostalCode" class="form-control" placeholder="Введите почтовый индекс" />
+
                 <span asp-validation-for="PostalCode" class="text-danger"></span>
             </div>
             <div class="form-group">
@@ -41,4 +48,12 @@
     @{
         await Html.RenderPartialAsync("_ValidationScriptsPartial");
     }
+
+    <script>
+        $(document).ready(function () {
+            $('#PostalCode').inputmask({ mask: '999999' });
+        });
+    </script>
+
+
 }
