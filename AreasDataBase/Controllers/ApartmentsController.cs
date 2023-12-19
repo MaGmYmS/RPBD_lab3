@@ -88,14 +88,26 @@ namespace AreasDataBase.Controllers
                 switch (searchColumn)
                 {
                     case "apartmentNumber":
-                        apartmentsQuery = apartmentsQuery.Where(s => s.ApartmentNumber.ToString().ToLower().Contains(searchString.ToLower()));
+                        if (int.TryParse(searchString, out int apartmentNumber))
+                        {
+                            apartmentsQuery = apartmentsQuery.Where(s => s.ApartmentNumber == apartmentNumber);
+                        }
                         break;
+
                     case "numberOfRooms":
-                        apartmentsQuery = apartmentsQuery.Where(s => s.NumberOfRooms.ToString().Contains(searchString.ToLower()));
+                        if (int.TryParse(searchString, out int numberOfRooms))
+                        {
+                            apartmentsQuery = apartmentsQuery.Where(s => s.NumberOfRooms == numberOfRooms);
+                        }
                         break;
+
                     case "area":
-                        apartmentsQuery = apartmentsQuery.Where(s => s.Area.ToString().Contains(searchString.ToLower()));
+                        if (double.TryParse(searchString, out double area))
+                        {
+                            apartmentsQuery = apartmentsQuery.Where(s => s.Area == area);
+                        }
                         break;
+
                     case "residentialBuilding.houseNumber":
                         apartmentsQuery = apartmentsQuery.Where(s => s.ResidentialBuilding.HouseNumber.ToLower().Contains(searchString.ToLower()));
                         break;

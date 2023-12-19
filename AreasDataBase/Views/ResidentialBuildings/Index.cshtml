@@ -7,8 +7,9 @@
 <h1>Список домов</h1>
 
 <p>
-    <a asp-action="Create">Добавить новую запись</a>
+    <button type="button" onclick="location.href='@Url.Action("Create")'">Добавить новую запись</button>
 </p>
+
 <form id="searchForm" asp-action="Index">
     <div class="input-group md-form form-sm form2 pl-0">
         <input id="searchString" name="searchString" class="form-control my-0 py-1 red-border" type="text" placeholder="Поиск" aria-label="Search" value="" />
@@ -74,8 +75,8 @@
                     @Html.DisplayFor(modelItem => item.Street.District.City.NameCity)
                 </td>
                 <td>
-                    <a asp-action="Edit" asp-route-id="@item.IdResidentialBuilding">Редактировать</a> |
-                    <a asp-action="Delete" asp-route-id="@item.IdResidentialBuilding">Удалить</a>
+                    <button asp-action="Edit" asp-route-id="@item.IdResidentialBuilding" class="btn btn-edit">Редактировать</button>
+                    <button asp-action="Delete" asp-route-id="@item.IdResidentialBuilding" class="btn btn-delete">Удалить</button>
                 </td>
             </tr>
         }

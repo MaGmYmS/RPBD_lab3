@@ -1,22 +1,174 @@
+/* Общие стили */
 html {
-  font-size: 14px;
+    font-size: 14px;
 }
 
 @media (min-width: 768px) {
-  html {
-    font-size: 16px;
-  }
-}
-
-.btn:focus, .btn:active:focus, .btn-link.nav-link:focus, .form-control:focus, .form-check-input:focus {
-  box-shadow: 0 0 0 0.1rem white, 0 0 0 0.25rem #258cfb;
-}
-
-html {
-  position: relative;
-  min-height: 100%;
+    html {
+        font-size: 16px;
+    }
 }
 
 body {
-  margin-bottom: 60px;
+    font-family: 'Arial', sans-serif;
+    background-color: #f4f4f4;
+    margin: 0;
+    padding: 0;
 }
+
+.container {
+    width: 95%;
+    margin: 0 auto;
+}
+
+/* Заголовки */
+h1, h2, h3 {
+    color: #333;
+}
+
+/* Навигационное меню */
+.navbar {
+    background-color: #007bff;
+    padding: 1rem;
+}
+
+    .navbar a {
+        color: #fff;
+        text-decoration: none;
+        margin-right: 1rem;
+    }
+
+/* Формы */
+.form-group {
+    margin-bottom: 1rem;
+}
+
+.form-control {
+    width: 100%;
+    padding: 0.5rem;
+    box-sizing: border-box;
+}
+
+/* Кнопки */
+.btn {
+    display: inline-block;
+    padding: 0.5rem 1rem;
+    text-align: center;
+    text-decoration: none;
+    background-color: #007bff;
+    color: #fff;
+    cursor: pointer;
+}
+
+    .btn:hover {
+        background-color: #003366;
+    }
+
+/* Ссылки */
+a {
+    color: #0056b3;
+    text-decoration: none;
+}
+
+    a:hover {
+        color: #003366;
+    }
+
+
+
+
+
+
+
+
+/* Заголовки таблицы */
+.table th {
+    background-color: #d15f4f;
+    color: #331a0c;
+    font-weight: bold; /* Жирный шрифт для заголовков */
+}
+
+/* Подсветка строк при наведении */
+/*.table tbody tr:hover {
+    background-color: #471014;*/ /* Нежный серый цвет при наведении */
+/*}*/
+/* Границы ячеек */
+.table td, .table th {
+    /*border: 0.001px solid #d15f4f;*/ /* Светлая тень для границ ячеек */
+    padding: 0.3rem; /* Отступ внутри ячейки */
+}
+
+/* Выравнивание текста в ячейках по центру */
+.table th, .table td {
+    text-align: center;
+    vertical-align: middle; /* Добавленное выравнивание по вертикали */
+}
+
+
+/* Добавим немного тени для подчеркивания границ таблицы */
+.table {
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Тень для таблицы */
+}
+
+
+
+
+
+
+
+
+
+
+button {
+    padding: 10px 20px;
+    font-size: 16px;
+    background-color: #1196ac; 
+    color: #fff;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+    button:hover {
+        background-color: #136a26; /* Зеленый цвет в темном оттенке при наведении */
+    }
+
+
+/* Кнопки редактирования и удаления */
+.btn-edit,
+.btn-delete {
+    display: inline-block;
+    padding: 0.5rem 1rem;
+    text-align: center;
+    text-decoration: none;
+    cursor: pointer;
+    border-radius: 4px;
+    transition: background-color 0.3s ease;
+    width: auto; /* Ширина установлена в авто */
+    min-width: 130px; /* Минимальная ширина для кнопок (можно установить другое значение) */
+}
+
+.btn-edit {
+    background-color: #28a745;
+    color: #fff;
+    border: 1px solid #28a745;
+    font-size: 14px; /* Размер шрифта */
+}
+
+.btn-delete {
+    background-color: #dc3545;
+    color: #fff;
+    border: 1px solid #dc3545;
+    font-size: 14px; /* Размер шрифта */
+}
+
+/* Общие стили для кнопок редактирования и удаления */
+.btn-edit:hover {
+    background-color: #218838;
+}
+
+.btn-delete:hover {
+    background-color: #c82333;
+}
+

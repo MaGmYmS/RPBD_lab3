@@ -22,14 +22,11 @@ namespace AreasDataBase.Controllers
         // GET: Areas
         public async Task<IActionResult> Index(string searchString, string searchColumn, string sortOrder)
         {
-            // Определение параметров сортировки для представления
             ViewData["SubjectCodeSortParam"] = String.IsNullOrEmpty(sortOrder) ? "subjectCode_desc" : "";
             ViewData["NameAreaSortParam"] = sortOrder == "NameArea" ? "nameArea_desc" : "NameArea";
 
-            // Запрос областей
             IQueryable<Area> areasQuery = _context.Area;
 
-            // Применение сортировки в зависимости от sortOrder
             switch (sortOrder)
             {
                 case "subjectCode_desc":
@@ -46,27 +43,27 @@ namespace AreasDataBase.Controllers
                     break;
             }
 
-            // Применение фильтрации по searchString и searchColumn
             if (!String.IsNullOrEmpty(searchString))
             {
                 switch (searchColumn)
                 {
                     case "subjectCode":
-                        areasQuery = areasQuery.Where(a => a.SubjectCode.ToString().Contains(searchString));
+                        if (int.TryParse(searchString, out int code))
+                        {
+                            areasQuery = areasQuery.Where(a => a.SubjectCode == code);
+                        }
                         break;
                     case "nameArea":
                         areasQuery = areasQuery.Where(a => a.NameArea.ToLower().Contains(searchString.ToLower()));
                         break;
-                        // Добавьте другие case для других столбцов при необходимости
                 }
             }
 
-            // Получение результата и передача его в представление
+
             return View(await areasQuery.ToListAsync());
         }
 
 
-        // GET: Areas/Details/5
         public async Task<IActionResult> Details(int? id)
         {
             if (id == null)

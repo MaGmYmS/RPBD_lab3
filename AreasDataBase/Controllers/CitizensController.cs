@@ -111,37 +111,78 @@ namespace AreasDataBase.Controllers
                         citizens = citizens.Where(s => s.FullName.ToLower().Contains(searchString.ToLower()));
                         break;
                     case "passportData":
-                        citizens = citizens.Where(s => s.PassportData.ToString().Contains(searchString));
+                        if (long.TryParse(searchString, out long passportData))
+                        {
+                            citizens = citizens.Where(s => s.PassportData == passportData);
+                        }
                         break;
+
                     case "phoneNumber":
-                        citizens = citizens.Where(s => s.PhoneNumber.ToString().Contains(searchString));
+                        if (long.TryParse(searchString, out long phoneNumber))
+                        {
+                            citizens = citizens.Where(s => s.PhoneNumber == phoneNumber);
+                        }
                         break;
+
                     case "dateOfBirth":
-                        citizens = citizens.Where(s => s.DateOfBirth.ToString().Contains(searchString.ToLower()));
+                        DateTime searchDate;
+                        if (DateTime.TryParse(searchString, out searchDate))
+                        {
+                            searchDate = DateTime.SpecifyKind(searchDate, DateTimeKind.Utc);
+                            citizens = citizens.Where(s => s.DateOfBirth.Date == searchDate.Date);
+                        }
                         break;
+
+
+
                     case "gender":
-                        citizens = citizens.Where(s => s.Gender.ToString().ToLower().Contains(searchString.ToLower()));
+                        if (searchString.Equals("Мужской", StringComparison.OrdinalIgnoreCase))
+                        {
+                            citizens = citizens.Where(s => s.Gender == true);
+                        }
+                        else if (searchString.Equals("Женский", StringComparison.OrdinalIgnoreCase))
+                        {
+                            citizens = citizens.Where(s => s.Gender == false);
+                        }
                         break;
+
                     case "apartmentNumber":
-                        citizens = citizens.Where(s => s.Apartment.ApartmentNumber.ToString().Contains(searchString));
+                        if (int.TryParse(searchString, out int apartmentNum))
+                        {
+                            citizens = citizens.Where(s => s.Apartment.ApartmentNumber == apartmentNum);
+                        }
                         break;
                     case "city":
-                        citizens = citizens.AsEnumerable().Where(s => s.Apartment.ResidentialBuilding.Street.District.City.NameCity.ToLower().Contains(searchString.ToLower())).AsQueryable();
+                        citizens = citizens.Where(s => s.Apartment.ResidentialBuilding.Street.District.City.NameCity.ToLower().Contains(searchString.ToLower()));
                         break;
+
                     case "district":
-                        citizens = citizens.AsEnumerable().Where(s => s.Apartment.ResidentialBuilding.Street.District.NameDistrict.ToLower().Contains(searchString.ToLower())).AsQueryable();
+                        citizens = citizens.Where(s => s.Apartment.ResidentialBuilding.Street.District.NameDistrict.ToLower().Contains(searchString.ToLower())).AsQueryable();
                         break;
                     case "street":
-                        citizens = citizens.AsEnumerable().Where(s => s.Apartment.ResidentialBuilding.Street.NameStreet.ToLower().Contains(searchString.ToLower())).AsQueryable();
+                        citizens = citizens.Where(s => s.Apartment.ResidentialBuilding.Street.NameStreet.ToLower().Contains(searchString.ToLower())).AsQueryable();
                         break;
-                    case "houseNumber":
-                        citizens = citizens.AsEnumerable().Where(s => s.Apartment.ResidentialBuilding.HouseNumber.ToString().Contains(searchString)).AsQueryable();
-                        break;
+                    //case "houseNumber":
+
+                    //    if (!string.IsNullOrEmpty(searchString))
+                    //    {
+                    //        citizens = citizens
+                    //            .Where(c => c.Apartment.ResidentialBuilding.HouseNumber.ToString().Contains(searchString));
+                    //    }
+
+
+                    //    //citizens = citizens
+                    //    //    .Where(c => EF.Functions.Like(c.Apartment.ResidentialBuilding.HouseNumber.ToString(), $"%{searchString}%"));
+                    //    break;
+
+
+
                 }
 
             }
+            var result = await citizens.ToListAsync();
 
-            return View(await citizens.ToListAsync());
+            return View(result);
         }
 
 

@@ -19,7 +19,6 @@ namespace AreasDataBase.Controllers
             _context = context;
         }
 
-        // GET: Cities
         public async Task<IActionResult> Index(string searchString, string searchColumn, string sortOrder)
         {
             ViewData["NameCitySortParam"] = String.IsNullOrEmpty(sortOrder) ? "nameCity_desc" : "";
@@ -52,14 +51,16 @@ namespace AreasDataBase.Controllers
 
             if (!String.IsNullOrEmpty(searchString))
             {
-                // Используйте выбранный столбец для поиска
                 switch (searchColumn)
                 {
                     case "nameCity":
                         citiesQuery = citiesQuery.Where(s => s.NameCity.ToLower().Contains(searchString.ToLower()));
                         break;
                     case "postalCode":
-                        citiesQuery = citiesQuery.Where(s => s.PostalCode.ToString().Contains(searchString.ToLower()));
+                        if (int.TryParse(searchString, out int code))
+                        {
+                            citiesQuery = citiesQuery.Where(s => s.PostalCode == code);
+                        }
                         break;
                     case "areaName":
                         citiesQuery = citiesQuery.Where(s => s.Area.NameArea.ToLower().Contains(searchString.ToLower()));
@@ -70,7 +71,6 @@ namespace AreasDataBase.Controllers
             return View(await citiesQuery.ToListAsync());
         }
 
-        // GET: Cities/Details/5
         public async Task<IActionResult> Details(int? id)
         {
             if (id == null)

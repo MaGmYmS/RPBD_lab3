@@ -7,7 +7,7 @@
 <h1>Список городов</h1>
 
 <p>
-    <a asp-action="Create">Добавить новую запись</a>
+    <button type="button" onclick="location.href='@Url.Action("Create")'">Добавить новую запись</button>
 </p>
 
 <form id="searchForm" asp-action="Index">
@@ -54,9 +54,8 @@
                     @Html.DisplayFor(modelItem => item.Area.NameArea)
                 </td>
                 <td>
-                    <a asp-action="Edit" asp-route-id="@item.IdCity">Редактировать</a> |
-                    <a asp-action="Details" asp-route-id="@item.IdCity">Детали</a> |
-                    <a asp-action="Delete" asp-route-id="@item.IdCity">Удалить</a>
+                    <button asp-action="Edit" asp-route-id="@item.IdCity" class="btn btn-edit">Редактировать</button>
+                    <button asp-action="Delete" asp-route-id="@item.IdCity" class="btn btn-delete">Удалить</button>
                 </td>
             </tr>
         }

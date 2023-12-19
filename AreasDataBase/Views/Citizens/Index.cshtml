@@ -7,8 +7,9 @@
 <h1>Список граждан</h1>
 
 <p>
-    <a asp-action="Create">Добавить нового гражданина</a>
+    <button type="button" onclick="location.href='@Url.Action("Create")'">Добавить новую запись</button>
 </p>
+
 
 <form id="searchForm" asp-action="Index">
     <div class="input-group md-form form-sm form2 pl-0">
@@ -24,100 +25,104 @@
             <option value="city">Название города</option>
             <option value="district">Название района</option>
             <option value="street">Название улицы</option>
-            <option value="houseNumber">Номер дома</option>
+            @* <option value="houseNumber">Номер дома</option> *@
         </select>
         <button type="submit" class="btn btn-primary">Поиск</button>
     </div>
 </form>
 
 
-
-<table class="table">
-    <thead>
-        <tr>
-            <th>
-                <a asp-action="Index" asp-route-sortOrder="@ViewData["FullNameSortParam"]">@Html.DisplayNameFor(model => model.FullName)</a>
-            </th>
-            <th>
-                <a asp-action="Index" asp-route-sortOrder="@ViewData["PassportSortParam"]">@Html.DisplayNameFor(model => model.PassportData)</a>
-            </th>
-            <th>
-                <a asp-action="Index" asp-route-sortOrder="@ViewData["PhoneNumberSortParam"]">@Html.DisplayNameFor(model => model.PhoneNumber)</a>
-            </th>
-            <th>
-                <a asp-action="Index" asp-route-sortOrder="@ViewData["DateOfBirthSortParam"]">@Html.DisplayNameFor(model => model.DateOfBirth)</a>
-            </th>
-            <th>
-                <a asp-action="Index" asp-route-sortOrder="@ViewData["GenderSortParam"]">@Html.DisplayNameFor(model => model.Gender)</a>
-            </th>
-            <th>
-                <a asp-action="Index" asp-route-sortOrder="@ViewData["CitySortParam"]">@Html.DisplayNameFor(model => model.Apartment.ResidentialBuilding.Street.District.City.NameCity)</a>
-            </th>
-            <th>
-                <a asp-action="Index" asp-route-sortOrder="@ViewData["DistrictSortParam"]">@Html.DisplayNameFor(model => model.Apartment.ResidentialBuilding.Street.District.NameDistrict)</a>
-            </th>
-            <th>
-                <a asp-action="Index" asp-route-sortOrder="@ViewData["StreetSortParam"]">@Html.DisplayNameFor(model => model.Apartment.ResidentialBuilding.Street.NameStreet)</a>
-            </th>
-            <th>
-                <a asp-action="Index" asp-route-sortOrder="@ViewData["HouseNumberSortParam"]">@Html.DisplayNameFor(model => model.Apartment.ResidentialBuilding.HouseNumber)</a>
-            </th>
-            <th>
-                <a asp-action="Index" asp-route-sortOrder="@ViewData["ApartmentSortParam"]">@Html.DisplayNameFor(model => model.Apartment.ApartmentNumber)</a>
-            </th>
-            <th></th>
-        </tr>
-    </thead>
-    <tbody>
-        @foreach (var item in Model)
-        {
+<div id="table-wrapper">
+    <table class="table">
+        <thead>
             <tr>
-                <td>
-                    @Html.DisplayFor(modelItem => item.FullName)
-                </td>
-                <td>
-                    @Html.DisplayFor(modelItem => item.PassportData)
-                </td>
-                <td>
-                    @Html.DisplayFor(modelItem => item.PhoneNumber)
-                </td>
-                <td>
-                    @Html.DisplayFor(modelItem => item.DateOfBirth)
-                </td>
-                <td>
-                    @if (item.Gender == true)
-                    {
-                        <span>Мужской</span>
-                    }
-                    else
-                    {
-                        <span>Женский</span>
-                    }
-                </td>
-
-                <td>
-                    @Html.DisplayFor(modelItem => item.Apartment.ResidentialBuilding.Street.District.City.NameCity)
-                </td>
-                <td>
-                    @Html.DisplayFor(modelItem => item.Apartment.ResidentialBuilding.Street.District.NameDistrict)
-                </td>
-                <td>
-                    @Html.DisplayFor(modelItem => item.Apartment.ResidentialBuilding.Street.NameStreet)
-                </td>
-                <td>
-                    @Html.DisplayFor(modelItem => item.Apartment.ResidentialBuilding.HouseNumber)
-                </td>
-                <td>
-                    @Html.DisplayFor(modelItem => item.Apartment.ApartmentNumber)
-                </td>
-                <td>
-                    <a asp-action="Edit" asp-route-id="@item.IdCitizen">Редактировать</a> |
-                    <a asp-action="Delete" asp-route-id="@item.IdCitizen">Удалить</a>
-                </td>
+                <th>
+                    <a asp-action="Index" asp-route-sortOrder="@ViewData["FullNameSortParam"]">@Html.DisplayNameFor(model => model.FullName)</a>
+                </th>
+                <th>
+                    <a asp-action="Index" asp-route-sortOrder="@ViewData["PassportSortParam"]">@Html.DisplayNameFor(model => model.PassportData)</a>
+                </th>
+                <th>
+                    <a asp-action="Index" asp-route-sortOrder="@ViewData["PhoneNumberSortParam"]">@Html.DisplayNameFor(model => model.PhoneNumber)</a>
+                </th>
+                <th>
+                    <a asp-action="Index" asp-route-sortOrder="@ViewData["DateOfBirthSortParam"]">@Html.DisplayNameFor(model => model.DateOfBirth)</a>
+                </th>
+                <th>
+                    <a asp-action="Index" asp-route-sortOrder="@ViewData["GenderSortParam"]">@Html.DisplayNameFor(model => model.Gender)</a>
+                </th>
+                <th>
+                    <a asp-action="Index" asp-route-sortOrder="@ViewData["CitySortParam"]">@Html.DisplayNameFor(model => model.Apartment.ResidentialBuilding.Street.District.City.NameCity)</a>
+                </th>
+                <th>
+                    <a asp-action="Index" asp-route-sortOrder="@ViewData["DistrictSortParam"]">@Html.DisplayNameFor(model => model.Apartment.ResidentialBuilding.Street.District.NameDistrict)</a>
+                </th>
+                <th>
+                    <a asp-action="Index" asp-route-sortOrder="@ViewData["StreetSortParam"]">@Html.DisplayNameFor(model => model.Apartment.ResidentialBuilding.Street.NameStreet)</a>
+                </th>
+                <th>
+                    <a asp-action="Index" asp-route-sortOrder="@ViewData["HouseNumberSortParam"]">@Html.DisplayNameFor(model => model.Apartment.ResidentialBuilding.HouseNumber)</a>
+                </th>
+                <th>
+                    <a asp-action="Index" asp-route-sortOrder="@ViewData["ApartmentSortParam"]">@Html.DisplayNameFor(model => model.Apartment.ApartmentNumber)</a>
+                </th>
+                <th></th>
             </tr>
-        }
-    </tbody>
-</table>
+        </thead>
+
+        <tbody>
+            @foreach (var item in Model)
+            {
+                <tr>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.FullName)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.PassportData)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.PhoneNumber)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.DateOfBirth)
+                    </td>
+                    <td>
+                        @if (item.Gender == true)
+                        {
+                            <span>Мужской</span>
+                        }
+                        else
+                        {
+                            <span>Женский</span>
+                        }
+                    </td>
+
+                    <td>
+                        @Html.DisplayFor(modelItem => item.Apartment.ResidentialBuilding.Street.District.City.NameCity)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.Apartment.ResidentialBuilding.Street.District.NameDistrict)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.Apartment.ResidentialBuilding.Street.NameStreet)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.Apartment.ResidentialBuilding.HouseNumber)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.Apartment.ApartmentNumber)
+                    </td>
+                    <td>
+                        <a asp-action="Edit" asp-route-id="@item.IdCitizen" class="btn-edit">Редактировать</a> 
+                        <a asp-action="Delete" asp-route-id="@item.IdCitizen" class="btn-delete">Удалить</a>
+                    </td>
+
+
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
 
 @section scripts {
     <script>

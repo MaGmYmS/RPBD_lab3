@@ -33,15 +33,17 @@ namespace AreasDataBase.Models
 
         [Required(ErrorMessage = "Значение не может быть пустым")]
         [Display(Name = "Дата рождения")]
-        [Column("date_of_birth")]
+        //[Column("date_of_birth")]
         [DataType(DataType.Date)]
         [DisplayFormat(DataFormatString = "{0:dd.MM.yyyy}", ApplyFormatInEditMode = true)]
         //[Range(typeof(DateTime), "01/01/1900", "01/01/2100", ErrorMessage = "Дата рождения должна быть между 01.01.1900 и 01.01.2100")]
-        public DateTime DateOfBirth 
-        {
-            get => _dateOfBirth;
-            set => _dateOfBirth = DateTime.SpecifyKind(value, DateTimeKind.Utc);
-        }
+        [Column("date_of_birth", TypeName = "timestamp with time zone")]
+        public DateTime DateOfBirth { get; set; } = DateTime.UtcNow;
+
+        //{
+        //    get => _dateOfBirth;
+        //    set => _dateOfBirth = DateTime.SpecifyKind(value, DateTimeKind.Utc);
+        //}
 
         [Required(ErrorMessage = "Значение не может быть пустым")]
         [Display(Name = "Пол")]

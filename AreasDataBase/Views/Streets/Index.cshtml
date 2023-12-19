@@ -7,7 +7,7 @@
 <h1>Список улиц</h1>
 
 <p>
-    <a asp-action="Create">Добавить новую запись</a>
+    <button type="button" onclick="location.href='@Url.Action("Create")'">Добавить новую запись</button>
 </p>
 
 <form id="searchForm" asp-action="Index">
@@ -61,8 +61,8 @@
                 </td>
 
                 <td>
-                    <a asp-action="Edit" asp-route-id="@item.IdStreet">Редактировать</a> |
-                    <a asp-action="Delete" asp-route-id="@item.IdStreet">Удалить</a>
+                    <button asp-action="Edit" asp-route-id="@item.IdStreet" class="btn btn-edit">Редактировать</button>
+                    <button asp-action="Delete" asp-route-id="@item.IdStreet" class="btn btn-delete">Удалить</button>
                 </td>
             </tr>
         }

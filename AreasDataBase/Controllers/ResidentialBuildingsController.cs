@@ -19,7 +19,6 @@ namespace AreasDataBase.Controllers
             _context = context;
         }
 
-        // GET: ResidentialBuildings
         public async Task<IActionResult> Index(string searchString, string searchColumn, string sortOrder)
         {
             ViewData["HouseNumberSortParam"] = String.IsNullOrEmpty(sortOrder) ? "houseNumber_desc" : "";
@@ -76,43 +75,49 @@ namespace AreasDataBase.Controllers
 
             if (!String.IsNullOrEmpty(searchString))
             {
-                // Используйте выбранный столбец для поиска
                 switch (searchColumn)
                 {
                     case "houseNumber":
                         residentialBuildingsQuery = residentialBuildingsQuery
                             .Where(r => EF.Functions.Like(r.HouseNumber, $"%{searchString}%"));
                         break;
+
                     case "YearOfConstruction":
-                        residentialBuildingsQuery = residentialBuildingsQuery
-                            .Where(r => EF.Functions.Like(r.YearOfConstruction.ToString(), $"%{searchString}%"));
+                        if (int.TryParse(searchString, out int year))
+                        {
+                            residentialBuildingsQuery = residentialBuildingsQuery
+                                .Where(r => r.YearOfConstruction == year);
+                        }
                         break;
+
                     case "NumbersOfFloors":
-                        residentialBuildingsQuery = residentialBuildingsQuery
-                            .Where(r => EF.Functions.Like(r.NumbersOfFloors.ToString(), $"%{searchString}%"));
+                        if (int.TryParse(searchString, out int floors))
+                        {
+                            residentialBuildingsQuery = residentialBuildingsQuery
+                                .Where(r => r.NumbersOfFloors == floors);
+                        }
                         break;
+
                     case "streetName":
-                        residentialBuildingsQuery = residentialBuildingsQuery
-                            .Where(r => EF.Functions.Like(r.Street.NameStreet, $"%{searchString}%"));
+                        residentialBuildingsQuery = residentialBuildingsQuery.Where(s => s.Street.NameStreet.ToLower().Contains(searchString.ToLower()));
                         break;
+
                     case "districtName":
-                        residentialBuildingsQuery = residentialBuildingsQuery
-                            .Where(r => EF.Functions.Like(r.Street.District.NameDistrict, $"%{searchString}%"));
+                        residentialBuildingsQuery = residentialBuildingsQuery.Where(s => s.Street.District.NameDistrict.ToLower().Contains(searchString.ToLower()));
                         break;
+
                     case "cityName":
-                        residentialBuildingsQuery = residentialBuildingsQuery
-                            .Where(r => EF.Functions.Like(r.Street.District.City.NameCity, $"%{searchString}%"));
+                        residentialBuildingsQuery = residentialBuildingsQuery.Where(s => s.Street.District.City.NameCity.ToLower().Contains(searchString.ToLower()));
                         break;
+
                 }
+
             }
 
             return View(await residentialBuildingsQuery.ToListAsync());
         }
 
 
-
-
-        // GET: ResidentialBuildings/Details/5
         public async Task<IActionResult> Details(int? id)
         {
             if (id == null)
@@ -131,7 +136,6 @@ namespace AreasDataBase.Controllers
             return View(residentialBuilding);
         }
 
-        // GET: ResidentialBuildings/Create
         public IActionResult Create()
         {
             ViewData["CityId"] = new SelectList(_context.City, "IdCity", "NameCity");
@@ -142,9 +146,6 @@ namespace AreasDataBase.Controllers
         }
 
 
-        // POST: ResidentialBuildings/Create
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create([Bind("IdResidentialBuilding,HouseNumber,YearOfConstruction,NumbersOfFloors,StreetId")] ResidentialBuilding residentialBuilding)
@@ -161,7 +162,6 @@ namespace AreasDataBase.Controllers
             return View(residentialBuilding);
         }
 
-        // GET: ResidentialBuildings/Edit/5
         public async Task<IActionResult> Edit(int? id)
         {
             if (id == null)
@@ -180,10 +180,8 @@ namespace AreasDataBase.Controllers
                 return NotFound();
             }
 
-            // Заполнение списка городов
             ViewBag.CityId = new SelectList(_context.City, "IdCity", "NameCity", residentialBuilding.Street.District.CityId);
 
-            // Заполнение списка районов для выбранного города
             ViewBag.DistrictId = new SelectList(
                 _context.District.Where(d => d.CityId == residentialBuilding.Street.District.CityId),
                 "IdDistrict",
@@ -191,7 +189,6 @@ namespace AreasDataBase.Controllers
                 residentialBuilding.Street.DistrictId
             );
 
-            // Заполнение списка улиц для выбранного района
             ViewBag.StreetId = new SelectList(
                 _context.Street.Where(s => s.DistrictId == residentialBuilding.Street.DistrictId),
                 "IdStreet",
@@ -203,9 +200,6 @@ namespace AreasDataBase.Controllers
         }
 
 
-        // POST: ResidentialBuildings/Edit/5
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(int id, [Bind("IdResidentialBuilding,HouseNumber,YearOfConstruction,NumbersOfFloors,StreetId")] ResidentialBuilding residentialBuilding)
@@ -241,7 +235,6 @@ namespace AreasDataBase.Controllers
             return View(residentialBuilding);
         }
 
-        // GET: ResidentialBuildings/Delete/5
         public async Task<IActionResult> Delete(int? id)
         {
             if (id == null)
@@ -260,7 +253,6 @@ namespace AreasDataBase.Controllers
             return View(residentialBuilding);
         }
 
-        // POST: ResidentialBuildings/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
