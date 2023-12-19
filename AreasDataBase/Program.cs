@@ -1,12 +1,15 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using AreasDataBase.Data;
+using AreasDataBase.Controllers;
+
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddDbContext<AreasDataBaseContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("AreasDataBaseContext") ?? throw new InvalidOperationException("Connection string 'AreasDataBaseContext' not found.")));
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
+builder.Services.AddSignalR();
 
 var app = builder.Build();
 
@@ -28,5 +31,10 @@ app.UseAuthorization();
 app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Home}/{action=Index}/{id?}");
+app.UseEndpoints(endpoints =>
+{
+    endpoints.MapHub<UpdateHub>("/updateHub");
+    // ... другие маршруты
+});
 
 app.Run();

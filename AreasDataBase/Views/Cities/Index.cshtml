@@ -85,4 +85,21 @@
             }
         });
     </script>
+
+    <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/5.0.7/signalr.min.js"></script>
+
+    <script>
+        var connection = new signalR.HubConnectionBuilder()
+            .withUrl("/updateHub") // Путь к хабу
+            .build();
+
+        connection.on("SendUpdateNotification", function () {
+            location.reload(true);
+        });
+
+        connection.start().catch(function (err) {
+            return console.error(err.toString());
+        });
+    </script>
 }

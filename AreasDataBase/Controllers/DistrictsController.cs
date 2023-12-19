@@ -7,16 +7,20 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using AreasDataBase.Data;
 using AreasDataBase.Models;
+using Microsoft.AspNetCore.SignalR;
+using System.IO;
 
 namespace AreasDataBase.Controllers
 {
     public class DistrictsController : Controller
     {
         private readonly AreasDataBaseContext _context;
+        private readonly IHubContext<UpdateHub> _hubContext;
 
-        public DistrictsController(AreasDataBaseContext context)
+        public DistrictsController(AreasDataBaseContext context, IHubContext<UpdateHub> hub)
         {
             _context = context;
+            _hubContext = hub;
         }
 
         public async Task<IActionResult> Index(string searchString, string searchColumn, string sortOrder)
@@ -80,6 +84,7 @@ namespace AreasDataBase.Controllers
                 {
                     _context.Add(district);
                     await _context.SaveChangesAsync();
+                    await _hubContext.Clients.All.SendAsync("SendUpdateNotification", district.IdDistrict);
                     return RedirectToAction(nameof(Index));
                 }
             }
@@ -126,6 +131,7 @@ namespace AreasDataBase.Controllers
                     {
                         _context.Update(district);
                         await _context.SaveChangesAsync();
+                        await _hubContext.Clients.All.SendAsync("SendUpdateNotification", district.IdDistrict);
                     }
                     catch (DbUpdateConcurrencyException)
                     {
@@ -175,6 +181,7 @@ namespace AreasDataBase.Controllers
             }
 
             await _context.SaveChangesAsync();
+            await _hubContext.Clients.All.SendAsync("SendUpdateNotification", district.IdDistrict);
             return RedirectToAction(nameof(Index));
         }
 

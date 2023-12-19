@@ -7,16 +7,19 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using AreasDataBase.Data;
 using AreasDataBase.Models;
+using Microsoft.AspNetCore.SignalR;
 
 namespace AreasDataBase.Controllers
 {
     public class CitizensController : Controller
     {
         private readonly AreasDataBaseContext _context;
+        private readonly IHubContext<UpdateHub> _hubContext;
 
-        public CitizensController(AreasDataBaseContext context)
+        public CitizensController(AreasDataBaseContext context, IHubContext<UpdateHub> hub)
         {
             _context = context;
+            _hubContext = hub;
         }
 
         public async Task<IActionResult> Index(string searchString, string searchColumn, string sortOrder)
@@ -224,6 +227,7 @@ namespace AreasDataBase.Controllers
             {
                 _context.Add(citizen);
                 await _context.SaveChangesAsync();
+                await _hubContext.Clients.All.SendAsync("SendUpdateNotification", citizen.IdCitizen);
                 return RedirectToAction(nameof(Index));
             }
             ViewData["ApartmentId"] = new SelectList(_context.Apartment, "IdApartment", "ApartmentNumber", citizen.ApartmentId);
@@ -279,6 +283,7 @@ namespace AreasDataBase.Controllers
                 {
                     _context.Update(citizen);
                     await _context.SaveChangesAsync();
+                    await _hubContext.Clients.All.SendAsync("SendUpdateNotification", citizen.IdCitizen);
                 }
                 catch (DbUpdateConcurrencyException)
                 {
@@ -336,6 +341,7 @@ namespace AreasDataBase.Controllers
             }
 
             await _context.SaveChangesAsync();
+            await _hubContext.Clients.All.SendAsync("SendUpdateNotification", citizen.IdCitizen);
             return RedirectToAction(nameof(Index));
         }
 

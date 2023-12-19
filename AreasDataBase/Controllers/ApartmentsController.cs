@@ -7,16 +7,19 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using AreasDataBase.Data;
 using AreasDataBase.Models;
+using Microsoft.AspNetCore.SignalR;
 
 namespace AreasDataBase.Controllers
 {
     public class ApartmentsController : Controller
     {
         private readonly AreasDataBaseContext _context;
+        private readonly IHubContext<UpdateHub> _hubContext;
 
-        public ApartmentsController(AreasDataBaseContext context)
+        public ApartmentsController(AreasDataBaseContext context, IHubContext<UpdateHub> hub)
         {
             _context = context;
+            _hubContext = hub;
         }
 
         public async Task<IActionResult> Index(string searchString, string searchColumn, string sortOrder)
@@ -173,6 +176,7 @@ namespace AreasDataBase.Controllers
                 {
                     _context.Add(apartment);
                     await _context.SaveChangesAsync();
+                    await _hubContext.Clients.All.SendAsync("SendUpdateNotification", apartment.IdApartment);
                     return RedirectToAction(nameof(Index));
                 }
             }
@@ -252,6 +256,7 @@ namespace AreasDataBase.Controllers
                     try
                     {
                         _context.Update(apartment);
+                        await _hubContext.Clients.All.SendAsync("SendUpdateNotification", apartment.IdApartment);
                         await _context.SaveChangesAsync();
                     }
                     catch (DbUpdateConcurrencyException)
@@ -307,6 +312,7 @@ namespace AreasDataBase.Controllers
             }
 
             await _context.SaveChangesAsync();
+            await _hubContext.Clients.All.SendAsync("SendUpdateNotification", apartment.IdApartment);
             return RedirectToAction(nameof(Index));
         }
 

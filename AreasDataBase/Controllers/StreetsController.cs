@@ -7,16 +7,19 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using AreasDataBase.Data;
 using AreasDataBase.Models;
+using Microsoft.AspNetCore.SignalR;
 
 namespace AreasDataBase.Controllers
 {
     public class StreetsController : Controller
     {
         private readonly AreasDataBaseContext _context;
+        private readonly IHubContext<UpdateHub> _hubContext;
 
-        public StreetsController(AreasDataBaseContext context)
+        public StreetsController(AreasDataBaseContext context, IHubContext<UpdateHub> hub)
         {
             _context = context;
+            _hubContext = hub;
         }
 
         public async Task<IActionResult> Index(string searchString, string searchColumn, string sortOrder)
@@ -112,6 +115,7 @@ namespace AreasDataBase.Controllers
                 {
                     _context.Add(street);
                     await _context.SaveChangesAsync();
+                    await _hubContext.Clients.All.SendAsync("SendUpdateNotification", street.IdStreet);
                     return RedirectToAction(nameof(Index));
                 }
             }
@@ -169,6 +173,7 @@ namespace AreasDataBase.Controllers
                     {
                         _context.Update(street);
                         await _context.SaveChangesAsync();
+                        await _hubContext.Clients.All.SendAsync("SendUpdateNotification", street.IdStreet);
                     }
                     catch (DbUpdateConcurrencyException)
                     {
@@ -219,6 +224,7 @@ namespace AreasDataBase.Controllers
             }
 
             await _context.SaveChangesAsync();
+            await _hubContext.Clients.All.SendAsync("SendUpdateNotification", street.IdStreet);
             return RedirectToAction(nameof(Index));
         }
 
