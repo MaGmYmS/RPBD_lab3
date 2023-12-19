@@ -8,6 +8,11 @@ using Microsoft.EntityFrameworkCore;
 using AreasDataBase.Data;
 using AreasDataBase.Models;
 using Microsoft.AspNetCore.SignalR;
+using OfficeOpenXml;
+using Xceed.Words.NET;
+using Xceed.Document.NET;
+using System.IO;
+using System.IO.Packaging;
 
 namespace AreasDataBase.Controllers
 {
@@ -15,6 +20,7 @@ namespace AreasDataBase.Controllers
     {
         private readonly AreasDataBaseContext _context;
         private readonly IHubContext<UpdateHub> _hubContext;
+        private static List<Citizen> _sortedFiltredCitizens;
 
         public CitizensController(AreasDataBaseContext context, IHubContext<UpdateHub> hub)
         {
@@ -184,28 +190,121 @@ namespace AreasDataBase.Controllers
 
             }
             var result = await citizens.ToListAsync();
+            _sortedFiltredCitizens = citizens.ToList();
 
             return View(result);
         }
 
-
-        public async Task<IActionResult> Details(int? id)
+        [HttpGet]
+        public IActionResult ExportCitizensToExcel()
         {
-            if (id == null)
-            {
-                return NotFound();
-            }
+            ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
 
-            var citizen = await _context.Citizen
-                .Include(c => c.Apartment)
-                .FirstOrDefaultAsync(m => m.IdCitizen == id);
-            if (citizen == null)
+            // Создаем новый пакет Excel
+            using (var package = new ExcelPackage())
             {
-                return NotFound();
-            }
+                // Добавляем новый лист
+                var worksheet = package.Workbook.Worksheets.Add("Citizens");
 
-            return View(citizen);
+                // Добавляем заголовки
+                worksheet.Cells[1, 1].Value = "Полное имя";
+                worksheet.Cells[1, 2].Value = "Паспортные данные";
+                worksheet.Cells[1, 3].Value = "Номер телефона";
+                worksheet.Cells[1, 4].Value = "Дата рождения";
+                worksheet.Cells[1, 5].Value = "Пол";
+                worksheet.Cells[1, 6].Value = "Номер квартиры";
+                worksheet.Cells[1, 7].Value = "Город";
+                worksheet.Cells[1, 8].Value = "Район";
+                worksheet.Cells[1, 9].Value = "Улица";
+                worksheet.Cells[1, 10].Value = "Номер дома";
+
+                var sortedFiltredCitizens = _sortedFiltredCitizens;
+                // Заполняем ячейки данными
+                for (int i = 0; i < sortedFiltredCitizens.Count; i++)
+                {
+                    var citizen = sortedFiltredCitizens[i];
+
+                    worksheet.Cells[i + 2, 1].Value = citizen.FullName;
+                    worksheet.Cells[i + 2, 2].Value = citizen.PassportData;
+                    worksheet.Cells[i + 2, 3].Value = citizen.PhoneNumber;
+                    worksheet.Cells[i + 2, 4].Value = citizen.DateOfBirth.ToString("dd.MM.yyyy");
+                    worksheet.Cells[i + 2, 5].Value = citizen.Gender ? "Мужской" : "Женский";
+                    worksheet.Cells[i + 2, 6].Value = citizen.Apartment.ApartmentNumber;
+                    worksheet.Cells[i + 2, 7].Value = citizen.Apartment.ResidentialBuilding.Street.District.City.NameCity;
+                    worksheet.Cells[i + 2, 8].Value = citizen.Apartment.ResidentialBuilding.Street.District.NameDistrict;
+                    worksheet.Cells[i + 2, 9].Value = citizen.Apartment.ResidentialBuilding.Street.NameStreet;
+                    worksheet.Cells[i + 2, 10].Value = citizen.Apartment.ResidentialBuilding.HouseNumber;
+                }
+
+                // Устанавливаем автоширину для всех столбцов
+                for (int col = 1; col <= 10; col++)
+                {
+                    worksheet.Column(col).AutoFit();
+                }
+
+                // Сохраняем файл на сервере
+                var memoryStream = new MemoryStream();
+                package.SaveAs(memoryStream);
+                memoryStream.Position = 0;
+
+                // Возвращаем файл пользователю
+                return File(memoryStream.ToArray(), "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", "Citizens.xlsx");
+            }
         }
+
+        [HttpGet]
+        public IActionResult ExportCitizensToWord()
+        {
+            // Создаем новый документ Word
+            using (var doc = DocX.Create("Citizens.docx"))
+            {
+                // Добавляем заголовок
+                doc.InsertParagraph("Список граждан").FontSize(20d).Bold().Alignment = Alignment.center;
+
+                // Добавляем таблицу
+                var table = doc.AddTable(_sortedFiltredCitizens.Count + 1, 10);
+                table.Design = TableDesign.TableGrid;
+
+                // Добавляем заголовки таблицы
+                table.Rows[0].Cells[0].Paragraphs.First().Append("Полное имя");
+                table.Rows[0].Cells[1].Paragraphs.First().Append("Паспортные данные");
+                table.Rows[0].Cells[2].Paragraphs.First().Append("Номер телефона");
+                table.Rows[0].Cells[3].Paragraphs.First().Append("Дата рождения");
+                table.Rows[0].Cells[4].Paragraphs.First().Append("Пол");
+                table.Rows[0].Cells[5].Paragraphs.First().Append("Номер квартиры");
+                table.Rows[0].Cells[6].Paragraphs.First().Append("Город");
+                table.Rows[0].Cells[7].Paragraphs.First().Append("Район");
+                table.Rows[0].Cells[8].Paragraphs.First().Append("Улица");
+                table.Rows[0].Cells[9].Paragraphs.First().Append("Номер дома");
+
+                // Заполняем таблицу данными
+                for (int i = 0; i < _sortedFiltredCitizens.Count; i++)
+                {
+                    var citizen = _sortedFiltredCitizens[i];
+
+                    table.Rows[i + 1].Cells[0].Paragraphs.First().Append(citizen.FullName);
+                    table.Rows[i + 1].Cells[1].Paragraphs.First().Append(citizen.PassportData.ToString());
+                    table.Rows[i + 1].Cells[2].Paragraphs.First().Append(citizen.PhoneNumber.ToString());
+                    table.Rows[i + 1].Cells[3].Paragraphs.First().Append(citizen.DateOfBirth.ToString("dd.MM.yyyy"));
+                    table.Rows[i + 1].Cells[4].Paragraphs.First().Append(citizen.Gender ? "Мужской" : "Женский");
+                    table.Rows[i + 1].Cells[5].Paragraphs.First().Append(citizen.Apartment.ApartmentNumber.ToString());
+                    table.Rows[i + 1].Cells[6].Paragraphs.First().Append(citizen.Apartment.ResidentialBuilding.Street.District.City.NameCity);
+                    table.Rows[i + 1].Cells[7].Paragraphs.First().Append(citizen.Apartment.ResidentialBuilding.Street.District.NameDistrict);
+                    table.Rows[i + 1].Cells[8].Paragraphs.First().Append(citizen.Apartment.ResidentialBuilding.Street.NameStreet);
+                    table.Rows[i + 1].Cells[9].Paragraphs.First().Append(citizen.Apartment.ResidentialBuilding.HouseNumber.ToString());
+                }
+
+                // Сохраняем документ
+                //doc.Save();
+
+                var memoryStream = new MemoryStream();
+                doc.SaveAs(memoryStream);
+                memoryStream.Position = 0;
+
+               return File(memoryStream.ToArray(), "application/vnd.openxmlformats-officedocument.wordprocessingml.document", "Citizens.docx");
+            }
+        }
+
 
         public IActionResult Create()
         {

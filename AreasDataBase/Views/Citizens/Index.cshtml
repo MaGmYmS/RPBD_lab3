@@ -8,7 +8,12 @@
 
 <p>
     <button type="button" onclick="location.href='@Url.Action("Create")'">Добавить новую запись</button>
+    <button id="exportExcelButton">Экспорт в Excel</button>
+    <button id="exportWordButton">Экспорт в Word</button>
 </p>
+
+
+
 
 
 <form id="searchForm" asp-action="Index">
@@ -163,4 +168,16 @@
             return console.error(err.toString());
         });
     </script>
+
+    <script>
+        document.getElementById('exportExcelButton').addEventListener('click', function () {
+            window.location.href = '@Url.Action("ExportCitizensToExcel", "Citizens")';
+        });
+
+        document.getElementById('exportWordButton').addEventListener('click', function () {
+            window.location.href = '@Url.Action("ExportCitizensToWord", "Citizens")';
+        });
+
+    </script>
+
 }
