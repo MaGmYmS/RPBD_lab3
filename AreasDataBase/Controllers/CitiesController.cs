@@ -71,49 +71,35 @@ namespace AreasDataBase.Controllers
             return View(await citiesQuery.ToListAsync());
         }
 
-        public async Task<IActionResult> Details(int? id)
-        {
-            if (id == null)
-            {
-                return NotFound();
-            }
-
-            var city = await _context.City
-                .Include(c => c.Area)
-                .FirstOrDefaultAsync(m => m.IdCity == id);
-            if (city == null)
-            {
-                return NotFound();
-            }
-
-            return View(city);
-        }
-
-        // GET: Cities/Create
         public IActionResult Create()
         {
             ViewData["AreaId"] = new SelectList(_context.Area, "IdArea", "NameArea");
             return View();
         }
 
-        // POST: Cities/Create
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create([Bind("IdCity,NameCity,PostalCode,AreaId")] City city)
         {
             if (ModelState.IsValid)
             {
-                _context.Add(city);
-                await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(Index));
+                // Проверяем уникальность названия города
+                if (_context.City.Any(c => c.NameCity.ToLower() == city.NameCity.ToLower()))
+                {
+                    ModelState.AddModelError("NameCity", "Такой город уже существует.");
+                }
+                else
+                {
+                    _context.Add(city);
+                    await _context.SaveChangesAsync();
+                    return RedirectToAction(nameof(Index));
+                }
             }
             ViewData["AreaId"] = new SelectList(_context.Area, "IdArea", "NameArea", city.AreaId);
             return View(city);
         }
 
-        // GET: Cities/Edit/5
+
         public async Task<IActionResult> Edit(int? id)
         {
             if (id == null)
@@ -130,9 +116,6 @@ namespace AreasDataBase.Controllers
             return View(city);
         }
 
-        // POST: Cities/Edit/5
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(int id, [Bind("IdCity,NameCity,PostalCode,AreaId")] City city)
@@ -144,29 +127,36 @@ namespace AreasDataBase.Controllers
 
             if (ModelState.IsValid)
             {
-                try
+                // Проверяем уникальность названия города
+                if (_context.City.Any(c => c.IdCity != city.IdCity && c.NameCity.ToLower() == city.NameCity.ToLower()))
                 {
-                    _context.Update(city);
-                    await _context.SaveChangesAsync();
+                    ModelState.AddModelError("NameCity", "Такой город уже существует.");
                 }
-                catch (DbUpdateConcurrencyException)
+                else
                 {
-                    if (!CityExists(city.IdCity))
+                    try
                     {
-                        return NotFound();
+                        _context.Update(city);
+                        await _context.SaveChangesAsync();
                     }
-                    else
+                    catch (DbUpdateConcurrencyException)
                     {
-                        throw;
+                        if (!CityExists(city.IdCity))
+                        {
+                            return NotFound();
+                        }
+                        else
+                        {
+                            throw;
+                        }
                     }
+                    return RedirectToAction(nameof(Index));
                 }
-                return RedirectToAction(nameof(Index));
             }
             ViewData["AreaId"] = new SelectList(_context.Area, "IdArea", "NameArea", city.AreaId);
             return View(city);
         }
 
-        // GET: Cities/Delete/5
         public async Task<IActionResult> Delete(int? id)
         {
             if (id == null)
@@ -185,7 +175,6 @@ namespace AreasDataBase.Controllers
             return View(city);
         }
 
-        // POST: Cities/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)

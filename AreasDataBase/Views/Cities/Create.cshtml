@@ -25,7 +25,8 @@
             </div>
             <div class="form-group">
                 <label asp-for="PostalCode" class="control-label"></label>
-                <input type="text" id="PostalCode" name="PostalCode" class="form-control" placeholder="Введите почтовый индекс" />
+                <input type="text" id="PostalCode" name="PostalCode" class="form-control"/> 
+                @* placeholder="Введите почтовый индекс" *@
 
                 <span asp-validation-for="PostalCode" class="text-danger"></span>
             </div>

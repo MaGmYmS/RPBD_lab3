@@ -19,16 +19,15 @@ namespace AreasDataBase.Controllers
             _context = context;
         }
 
-        // GET: Streets
         public async Task<IActionResult> Index(string searchString, string searchColumn, string sortOrder)
         {
             ViewData["NameStreetSortParam"] = String.IsNullOrEmpty(sortOrder) ? "nameStreet_desc" : "";
             ViewData["DistrictNameSortParam"] = sortOrder == "DistrictName" ? "districtName_desc" : "DistrictName";
-            ViewData["CityNameSortParam"] = sortOrder == "CityName" ? "cityName_desc" : "CityName"; // Добавлен параметр для сортировки по названию города
+            ViewData["CityNameSortParam"] = sortOrder == "CityName" ? "cityName_desc" : "CityName"; 
 
             IQueryable<Street> streetsQuery = _context.Street
                 .Include(s => s.District)
-                    .ThenInclude(d => d.City); // Явное включение District и City
+                    .ThenInclude(d => d.City); 
 
             switch (sortOrder)
             {
@@ -41,10 +40,10 @@ namespace AreasDataBase.Controllers
                 case "districtName_desc":
                     streetsQuery = streetsQuery.OrderByDescending(s => s.District.NameDistrict);
                     break;
-                case "CityName": // Добавлен случай для сортировки по названию города
+                case "CityName": 
                     streetsQuery = streetsQuery.OrderBy(s => s.District.City.NameCity);
                     break;
-                case "cityName_desc": // Добавлен случай для сортировки по названию города в обратном порядке
+                case "cityName_desc": 
                     streetsQuery = streetsQuery.OrderByDescending(s => s.District.City.NameCity);
                     break;
                 default:
@@ -54,7 +53,6 @@ namespace AreasDataBase.Controllers
 
             if (!String.IsNullOrEmpty(searchString))
             {
-                // Используйте выбранный столбец для поиска
                 switch (searchColumn)
                 {
                     case "nameStreet":
@@ -63,7 +61,7 @@ namespace AreasDataBase.Controllers
                     case "districtName":
                         streetsQuery = streetsQuery.Where(s => s.District.NameDistrict.ToLower().Contains(searchString.ToLower()));
                         break;
-                    case "сityName": // Добавлен случай для поиска по названию города
+                    case "сityName": 
                         streetsQuery = streetsQuery.Where(s => s.District.City.NameCity.ToLower().Contains(searchString.ToLower()));
                         break;
                 }
@@ -72,28 +70,6 @@ namespace AreasDataBase.Controllers
             return View(await streetsQuery.ToListAsync());
         }
 
-
-
-        // GET: Streets/Details/5
-        public async Task<IActionResult> Details(int? id)
-        {
-            if (id == null)
-            {
-                return NotFound();
-            }
-
-            var street = await _context.Street
-                .Include(s => s.District)
-                .FirstOrDefaultAsync(m => m.IdStreet == id);
-            if (street == null)
-            {
-                return NotFound();
-            }
-
-            return View(street);
-        }
-
-        // GET: Streets/Create
         public IActionResult Create()
         {
             ViewData["DistrictId"] = new SelectList(_context.District, "IdDistrict", "NameDistrict");
@@ -115,27 +91,39 @@ namespace AreasDataBase.Controllers
 
 
 
-        // POST: Streets/Create
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create([Bind("IdStreet,NameStreet,DistrictId")] Street street)
         {
             if (ModelState.IsValid)
             {
-                _context.Add(street);
-                await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(Index));
+                var district = _context.District.FirstOrDefault(d => d.IdDistrict == street.DistrictId);
+                if (district != null)
+                {
+                    street.District = district;
+                }
+
+                // Проверяем уникальность названия улицы внутри выбранного города
+                if (_context.Street.Any(s => s.NameStreet == street.NameStreet && s.District.CityId == street.District.CityId))
+                {
+                    ModelState.AddModelError("NameStreet", "Такая улица уже существует в выбранном городе.");
+                }
+                else
+                {
+                    _context.Add(street);
+                    await _context.SaveChangesAsync();
+                    return RedirectToAction(nameof(Index));
+                }
             }
+
+            // Переинициализируйте SelectList здесь, чтобы он был доступен при возврате представления с ошибкой
             ViewData["DistrictId"] = new SelectList(_context.District, "IdDistrict", "NameDistrict", street.DistrictId);
             ViewData["CityId"] = new SelectList(_context.City, "IdCity", "NameCity", street.District.CityId);
-
-
             return View(street);
         }
 
-        // GET: Streets/Edit/5
+
+
         public async Task<IActionResult> Edit(int? id)
         {
             if (id == null)
@@ -154,9 +142,6 @@ namespace AreasDataBase.Controllers
             return View(street);
         }
 
-        // POST: Streets/Edit/5
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(int id, [Bind("IdStreet,NameStreet,DistrictId")] Street street)
@@ -168,30 +153,43 @@ namespace AreasDataBase.Controllers
 
             if (ModelState.IsValid)
             {
-                try
+                var district = _context.District.FirstOrDefault(d => d.IdDistrict == street.DistrictId);
+                if (district != null)
                 {
-                    _context.Update(street);
-                    await _context.SaveChangesAsync();
+                    street.District = district;
                 }
-                catch (DbUpdateConcurrencyException)
+                // Проверяем уникальность названия улицы внутри выбранного города
+                if (_context.Street.Any(s => s.IdStreet != street.IdStreet && s.NameStreet == street.NameStreet && s.District.CityId == street.District.CityId))
                 {
-                    if (!StreetExists(street.IdStreet))
-                    {
-                        return NotFound();
-                    }
-                    else
-                    {
-                        throw;
-                    }
+                    ModelState.AddModelError("NameStreet", "Такая улица уже существует в выбранном городе.");
                 }
-                return RedirectToAction(nameof(Index));
+                else
+                {
+                    try
+                    {
+                        _context.Update(street);
+                        await _context.SaveChangesAsync();
+                    }
+                    catch (DbUpdateConcurrencyException)
+                    {
+                        if (!StreetExists(street.IdStreet))
+                        {
+                            return NotFound();
+                        }
+                        else
+                        {
+                            throw;
+                        }
+                    }
+                    return RedirectToAction(nameof(Index));
+                }
             }
             ViewData["DistrictId"] = new SelectList(_context.District, "IdDistrict", "NameDistrict", street.DistrictId);
             ViewData["CityId"] = new SelectList(_context.City, "IdCity", "NameCity", street.District.CityId);
             return View(street);
         }
 
-        // GET: Streets/Delete/5
+
         public async Task<IActionResult> Delete(int? id)
         {
             if (id == null)
@@ -210,7 +208,6 @@ namespace AreasDataBase.Controllers
             return View(street);
         }
 
-        // POST: Streets/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)

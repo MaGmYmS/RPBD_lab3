@@ -54,9 +54,10 @@
                     @Html.DisplayFor(modelItem => item.Area.NameArea)
                 </td>
                 <td>
-                    <button asp-action="Edit" asp-route-id="@item.IdCity" class="btn btn-edit">Редактировать</button>
-                    <button asp-action="Delete" asp-route-id="@item.IdCity" class="btn btn-delete">Удалить</button>
+                    <a asp-action="Edit" asp-route-id="@item.IdCity" class="btn btn-edit">Редактировать</a>
+                    <a asp-action="Delete" asp-route-id="@item.IdCity" class="btn btn-delete">Удалить</a>
                 </td>
+
             </tr>
         }
     </tbody>

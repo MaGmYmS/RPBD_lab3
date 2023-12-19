@@ -19,7 +19,6 @@ namespace AreasDataBase.Controllers
             _context = context;
         }
 
-        // GET: Apartments
         public async Task<IActionResult> Index(string searchString, string searchColumn, string sortOrder)
         {
             ViewData["ApartmentNumberSortParam"] = String.IsNullOrEmpty(sortOrder) ? "apartmentNumber_desc" : "";
@@ -126,26 +125,6 @@ namespace AreasDataBase.Controllers
             return View(await apartmentsQuery.ToListAsync());
         }
 
-
-        // GET: Apartments/Details/5
-        public async Task<IActionResult> Details(int? id)
-        {
-            if (id == null)
-            {
-                return NotFound();
-            }
-
-            var apartment = await _context.Apartment
-                .Include(a => a.ResidentialBuilding)
-                .FirstOrDefaultAsync(m => m.IdApartment == id);
-            if (apartment == null)
-            {
-                return NotFound();
-            }
-
-            return View(apartment);
-        }
-
         public IActionResult Create()
         {
             ViewData["ResidentialBuildingId"] = new SelectList(_context.ResidentialBuilding, "IdResidentialBuilding", "HouseNumber");
@@ -159,11 +138,43 @@ namespace AreasDataBase.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create([Bind("IdApartment,ApartmentNumber,NumberOfRooms,Area,ResidentialBuildingId")] Apartment apartment)
         {
+
+            var residentialBuilding = _context.ResidentialBuilding.FirstOrDefault(rb => rb.IdResidentialBuilding == apartment.ResidentialBuildingId);
+            if (residentialBuilding != null)
+            {
+                apartment.ResidentialBuilding = residentialBuilding;
+                var street = _context.Street.FirstOrDefault(s => s.IdStreet == apartment.ResidentialBuilding.StreetId);
+                if (street != null)
+                {
+                    apartment.ResidentialBuilding.Street = street;
+                    var district = _context.District.FirstOrDefault(d => d.IdDistrict == apartment.ResidentialBuilding.Street.DistrictId);
+                    if (district != null)
+                    {
+                        apartment.ResidentialBuilding.Street.District = district;
+                        var city = _context.City.FirstOrDefault(d => d.IdCity == apartment.ResidentialBuilding.Street.District.CityId);
+                        apartment.ResidentialBuilding.Street.District.City = city;
+                    }
+                }
+            }
+
             if (ModelState.IsValid)
             {
-                _context.Add(apartment);
-                await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(Index));
+                // Проверка на уникальность номера квартиры в этом доме
+                if (_context.Apartment.Any(a =>
+                    a.ApartmentNumber == apartment.ApartmentNumber &&
+                    a.ResidentialBuilding.Street.District.CityId == apartment.ResidentialBuilding.Street.District.CityId &&
+                    a.ResidentialBuilding.Street.DistrictId == apartment.ResidentialBuilding.Street.DistrictId &&
+                    a.ResidentialBuilding.StreetId == apartment.ResidentialBuilding.StreetId &&
+                    a.ResidentialBuildingId == apartment.ResidentialBuildingId))
+                {
+                    ModelState.AddModelError("ApartmentNumber", "Квартира с таким номером уже существует в этом доме.");
+                }
+                else
+                {
+                    _context.Add(apartment);
+                    await _context.SaveChangesAsync();
+                    return RedirectToAction(nameof(Index));
+                }
             }
 
             // При ошибке заполнения формы, обновляем также списки для города, района и улицы
@@ -206,25 +217,56 @@ namespace AreasDataBase.Controllers
                 return NotFound();
             }
 
+            var residentialBuilding = _context.ResidentialBuilding.FirstOrDefault(rb => rb.IdResidentialBuilding == apartment.ResidentialBuildingId);
+            if (residentialBuilding != null)
+            {
+                apartment.ResidentialBuilding = residentialBuilding;
+                var street = _context.Street.FirstOrDefault(s => s.IdStreet == apartment.ResidentialBuilding.StreetId);
+                if (street != null)
+                {
+                    apartment.ResidentialBuilding.Street = street;
+                    var district = _context.District.FirstOrDefault(d => d.IdDistrict == apartment.ResidentialBuilding.Street.DistrictId);
+                    if (district != null)
+                    {
+                        apartment.ResidentialBuilding.Street.District = district;
+                        var city = _context.City.FirstOrDefault(d => d.IdCity == apartment.ResidentialBuilding.Street.District.CityId);
+                        apartment.ResidentialBuilding.Street.District.City = city;
+                    }
+                }
+            }
+
             if (ModelState.IsValid)
             {
-                try
+                // Проверка на уникальность номера квартиры в этом доме
+                if (_context.Apartment.Any(a =>
+                    a.ApartmentNumber == apartment.ApartmentNumber &&
+                    a.ResidentialBuilding.Street.District.CityId == apartment.ResidentialBuilding.Street.District.CityId &&
+                    a.ResidentialBuilding.Street.DistrictId == apartment.ResidentialBuilding.Street.DistrictId &&
+                    a.ResidentialBuilding.StreetId == apartment.ResidentialBuilding.StreetId &&
+                    a.ResidentialBuildingId == apartment.ResidentialBuildingId))
                 {
-                    _context.Update(apartment);
-                    await _context.SaveChangesAsync();
+                    ModelState.AddModelError("ApartmentNumber", "Квартира с таким номером уже существует в этом доме.");
                 }
-                catch (DbUpdateConcurrencyException)
+                else
                 {
-                    if (!ApartmentExists(apartment.IdApartment))
+                    try
                     {
-                        return NotFound();
+                        _context.Update(apartment);
+                        await _context.SaveChangesAsync();
                     }
-                    else
+                    catch (DbUpdateConcurrencyException)
                     {
-                        throw;
+                        if (!ApartmentExists(apartment.IdApartment))
+                        {
+                            return NotFound();
+                        }
+                        else
+                        {
+                            throw;
+                        }
                     }
+                    return RedirectToAction(nameof(Index));
                 }
-                return RedirectToAction(nameof(Index));
             }
 
             // Загрузка данных для списков при ошибке заполнения формы
@@ -235,7 +277,6 @@ namespace AreasDataBase.Controllers
 
             return View(apartment);
         }
-
 
         public async Task<IActionResult> Delete(int? id)
         {
@@ -255,7 +296,6 @@ namespace AreasDataBase.Controllers
             return View(apartment);
         }
 
-        // POST: Apartments/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)

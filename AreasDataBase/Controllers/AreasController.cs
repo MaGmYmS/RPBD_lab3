@@ -64,38 +64,25 @@ namespace AreasDataBase.Controllers
         }
 
 
-        public async Task<IActionResult> Details(int? id)
-        {
-            if (id == null)
-            {
-                return NotFound();
-            }
-
-            var area = await _context.Area
-                .FirstOrDefaultAsync(m => m.IdArea == id);
-            if (area == null)
-            {
-                return NotFound();
-            }
-
-            return View(area);
-        }
-
-        // GET: Areas/Create
         public IActionResult Create()
         {
             return View();
         }
 
-        // POST: Areas/Create
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create([Bind("IdArea,SubjectCode,NameArea")] Area area)
         {
             if (ModelState.IsValid)
             {
+                // Проверка на уникальность SubjectCode
+                var existingArea = await _context.Area.FirstOrDefaultAsync(a => a.SubjectCode == area.SubjectCode);
+                if (existingArea != null)
+                {
+                    ModelState.AddModelError("SubjectCode", "Код региона уже существует.");
+                    return View(area);
+                }
+
                 _context.Add(area);
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
@@ -103,7 +90,7 @@ namespace AreasDataBase.Controllers
             return View(area);
         }
 
-        // GET: Areas/Edit/5
+
         public async Task<IActionResult> Edit(int? id)
         {
             if (id == null)
@@ -119,9 +106,6 @@ namespace AreasDataBase.Controllers
             return View(area);
         }
 
-        // POST: Areas/Edit/5
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(int id, [Bind("IdArea,SubjectCode,NameArea")] Area area)
@@ -133,6 +117,14 @@ namespace AreasDataBase.Controllers
 
             if (ModelState.IsValid)
             {
+                // Проверка на уникальность SubjectCode, исключая текущую запись
+                var existingAreaWithSameCode = await _context.Area.FirstOrDefaultAsync(a => a.SubjectCode == area.SubjectCode && a.IdArea != id);
+                if (existingAreaWithSameCode != null)
+                {
+                    ModelState.AddModelError("SubjectCode", "Код региона уже существует.");
+                    return View(area);
+                }
+
                 try
                 {
                     _context.Update(area);
@@ -154,7 +146,7 @@ namespace AreasDataBase.Controllers
             return View(area);
         }
 
-        // GET: Areas/Delete/5
+
         public async Task<IActionResult> Delete(int? id)
         {
             if (id == null)
@@ -172,7 +164,6 @@ namespace AreasDataBase.Controllers
             return View(area);
         }
 
-        // POST: Areas/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)

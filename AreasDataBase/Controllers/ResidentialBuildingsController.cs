@@ -117,25 +117,6 @@ namespace AreasDataBase.Controllers
             return View(await residentialBuildingsQuery.ToListAsync());
         }
 
-
-        public async Task<IActionResult> Details(int? id)
-        {
-            if (id == null)
-            {
-                return NotFound();
-            }
-
-            var residentialBuilding = await _context.ResidentialBuilding
-                .Include(r => r.Street)
-                .FirstOrDefaultAsync(m => m.IdResidentialBuilding == id);
-            if (residentialBuilding == null)
-            {
-                return NotFound();
-            }
-
-            return View(residentialBuilding);
-        }
-
         public IActionResult Create()
         {
             ViewData["CityId"] = new SelectList(_context.City, "IdCity", "NameCity");
@@ -152,15 +133,33 @@ namespace AreasDataBase.Controllers
         {
             if (ModelState.IsValid)
             {
-                _context.Add(residentialBuilding);
-                await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(Index));
+                var street = _context.Street.FirstOrDefault(s => s.IdStreet == residentialBuilding.StreetId);
+                if (street != null)
+                {
+                    residentialBuilding.Street = street;
+                    var district = _context.District.FirstOrDefault(s => s.IdDistrict == residentialBuilding.Street.DistrictId);
+                    residentialBuilding.Street.District = district;
+                }
+
+                // Проверяем уникальность дома и названия улицы
+                if (_context.ResidentialBuilding.Any(rb => rb.HouseNumber == residentialBuilding.HouseNumber && rb.StreetId == residentialBuilding.StreetId))
+                {
+                    ModelState.AddModelError("HouseNumber", "Такой дом уже существует на выбранной улице.");
+                }
+                else
+                {
+                    _context.Add(residentialBuilding);
+                    await _context.SaveChangesAsync();
+                    return RedirectToAction(nameof(Index));
+                }
             }
             ViewData["CityId"] = new SelectList(_context.City, "IdCity", "NameCity", residentialBuilding.Street.District.CityId);
             ViewData["DistrictId"] = new SelectList(_context.District, "IdDistrict", "NameDistrict", residentialBuilding.Street.DistrictId);
             ViewData["StreetId"] = new SelectList(_context.Street, "IdStreet", "NameStreet", residentialBuilding.StreetId);
             return View(residentialBuilding);
         }
+
+
 
         public async Task<IActionResult> Edit(int? id)
         {
@@ -211,29 +210,46 @@ namespace AreasDataBase.Controllers
 
             if (ModelState.IsValid)
             {
-                try
+                var street = _context.Street.FirstOrDefault(s => s.IdStreet == residentialBuilding.StreetId);
+                if (street != null)
                 {
-                    _context.Update(residentialBuilding);
-                    await _context.SaveChangesAsync();
+                    residentialBuilding.Street = street;
+                    var district = _context.District.FirstOrDefault(s => s.IdDistrict == residentialBuilding.Street.DistrictId);
+                    residentialBuilding.Street.District = district;
                 }
-                catch (DbUpdateConcurrencyException)
+
+                // Проверяем уникальность дома и названия улицы
+                if (_context.ResidentialBuilding.Any(rb => rb.HouseNumber == residentialBuilding.HouseNumber && rb.StreetId == residentialBuilding.StreetId && rb.IdResidentialBuilding != id))
                 {
-                    if (!ResidentialBuildingExists(residentialBuilding.IdResidentialBuilding))
-                    {
-                        return NotFound();
-                    }
-                    else
-                    {
-                        throw;
-                    }
+                    ModelState.AddModelError("HouseNumber", "Такой дом уже существует на выбранной улице.");
                 }
-                return RedirectToAction(nameof(Index));
+                else
+                {
+                    try
+                    {
+                        _context.Update(residentialBuilding);
+                        await _context.SaveChangesAsync();
+                    }
+                    catch (DbUpdateConcurrencyException)
+                    {
+                        if (!ResidentialBuildingExists(residentialBuilding.IdResidentialBuilding))
+                        {
+                            return NotFound();
+                        }
+                        else
+                        {
+                            throw;
+                        }
+                    }
+                    return RedirectToAction(nameof(Index));
+                }
             }
             ViewData["CityId"] = new SelectList(_context.City, "IdCity", "NameCity", residentialBuilding.Street.District.CityId);
             ViewData["DistrictId"] = new SelectList(_context.District, "IdDistrict", "NameDistrict", residentialBuilding.Street.DistrictId);
             ViewData["StreetId"] = new SelectList(_context.Street, "IdStreet", "NameStreet", residentialBuilding.StreetId);
             return View(residentialBuilding);
         }
+
 
         public async Task<IActionResult> Delete(int? id)
         {

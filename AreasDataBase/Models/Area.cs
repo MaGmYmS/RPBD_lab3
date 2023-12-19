@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
@@ -17,6 +18,7 @@ namespace AreasDataBase.Models
         [Range(1, 999, ErrorMessage = "Код области должен быть в диапазоне от 1 до 999")]
         [Display(Name = "Код субъекта")]
         [Column("subject_code")]
+        //[Remote(action: "IsSubjectCodeUnique", controller: "Area", ErrorMessage = "Код региона уже существует.")]
         public int SubjectCode { get; set; }
 
         [Required(ErrorMessage = "Значение не может быть пустым")]
