@@ -28,11 +28,11 @@ namespace AreasDataBase.Models
         [Column("numbers_of_floors")]
         public int NumbersOfFloors { get; set; }
 
-        [Required(ErrorMessage = "Значение не может быть пустым")]
+        //[Required(ErrorMessage = "Значение не может быть пустым")]
         [Display(Name = "Название улицы")]
         [Column("street_id")]
         [ForeignKey("street")]
-        public int StreetId { get; set; }
+        public int? StreetId { get; set; }
 
         public virtual Street? Street { get; set; }
 

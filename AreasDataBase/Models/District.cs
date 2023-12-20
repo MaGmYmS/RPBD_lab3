@@ -17,11 +17,11 @@ namespace AreasDataBase.Models
         [Column("name_district")]
         public string NameDistrict { get; set; }
 
-        [Required(ErrorMessage = "Значение не может быть пустым")]
+        //[Required(ErrorMessage = "Значение не может быть пустым")]
         [Display(Name = "Название города")]
         [Column("city_id")]
         [ForeignKey("city")]
-        public int CityId { get; set; }
+        public int? CityId { get; set; }
 
         public virtual City? City { get; set; }
 

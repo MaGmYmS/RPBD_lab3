@@ -66,14 +66,15 @@
                     @Html.DisplayFor(modelItem => item.NumbersOfFloors)
                 </td>
                 <td>
-                    @Html.DisplayFor(modelItem => item.Street.NameStreet)
+                    @(item.Street?.NameStreet ?? "Неизвестная улица")
                 </td>
                 <td>
-                    @Html.DisplayFor(modelItem => item.Street.District.NameDistrict)
+                    @(item.Street?.District?.NameDistrict ?? "Неизвестный район")
                 </td>
                 <td>
-                    @Html.DisplayFor(modelItem => item.Street.District.City.NameCity)
+                    @(item.Street?.District?.City?.NameCity ?? "Неизвестный город")
                 </td>
+
                 <td>
                     <a asp-action="Edit" asp-route-id="@item.IdResidentialBuilding" class="btn btn-edit">Редактировать</a>
                     <a asp-action="Delete" asp-route-id="@item.IdResidentialBuilding" class="btn btn-delete">Удалить</a>

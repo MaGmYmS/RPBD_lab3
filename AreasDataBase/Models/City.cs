@@ -23,11 +23,11 @@ namespace AreasDataBase.Models
         [Column("postal_code")]
         public int PostalCode { get; set; }
 
-        [Required(ErrorMessage = "Значение не может быть пустым")]
+        //[Required(ErrorMessage = "Значение не может быть пустым")]
         [Display(Name = "Название области")]
         [Column("area_id")]
         [ForeignKey("area")]
-        public int AreaId { get; set; }
+        public int? AreaId { get; set; }
 
         public virtual Area? Area { get; set; }
 

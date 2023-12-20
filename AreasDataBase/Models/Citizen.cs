@@ -46,11 +46,11 @@ namespace AreasDataBase.Models
         [Column("gender")]
         public bool Gender { get; set; }
 
-        [Required(ErrorMessage = "Значение не может быть пустым")]
+        //[Required(ErrorMessage = "Значение не может быть пустым")]
         [Display(Name = "Номер квартиры")]
         [Column("apartment_id")]
         [ForeignKey("apartment")]
-        public int ApartmentId { get; set; }
+        public int? ApartmentId { get; set; }
 
         public virtual Apartment? Apartment { get; set; }
     }

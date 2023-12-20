@@ -152,7 +152,7 @@ namespace AreasDataBase.Controllers
         }
 
 
-        public async Task<IActionResult> Delete(int? id)
+        public async Task<IActionResult> Delete(int? id, string deleteMode)
         {
             if (id == null)
             {
@@ -171,18 +171,33 @@ namespace AreasDataBase.Controllers
 
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> DeleteConfirmed(int id)
+        public async Task<IActionResult> DeleteConfirmed(int id, string deleteType)
         {
+            bool cascadeDelete = deleteType == "cascade";
+
             var area = await _context.Area.FindAsync(id);
             if (area != null)
             {
+                if (cascadeDelete)
+                {
+                }
+                else
+                {
+                    var relatedCities = _context.City.Where(c => c.AreaId == id);
+                    foreach (var c in relatedCities)
+                    {
+                        c.AreaId = null;
+                    }
+                }
                 _context.Area.Remove(area);
             }
 
             await _context.SaveChangesAsync();
-            await _hubContext.Clients.All.SendAsync("SendUpdateNotification", area.IdArea);
+            await _hubContext.Clients.All.SendAsync("SendUpdateNotification", area?.IdArea);
             return RedirectToAction(nameof(Index));
         }
+
+
 
         private bool AreaExists(int id)
         {

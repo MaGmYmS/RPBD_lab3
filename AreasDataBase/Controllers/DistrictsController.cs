@@ -172,18 +172,31 @@ namespace AreasDataBase.Controllers
 
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> DeleteConfirmed(int id)
+        public async Task<IActionResult> DeleteConfirmed(int id, string deleteType)
         {
+            bool cascadeDelete = deleteType == "cascade";
+
             var district = await _context.District.FindAsync(id);
             if (district != null)
             {
+                if (!cascadeDelete)
+                {
+                    // Убираем связь района с городом, если таковая есть
+                    var relatedStreets = _context.Street.Where(c => c.DistrictId == id);
+                    foreach (var streeet in relatedStreets)
+                    {
+                        streeet.DistrictId = null;
+                    }
+                }
+
                 _context.District.Remove(district);
             }
 
             await _context.SaveChangesAsync();
-            await _hubContext.Clients.All.SendAsync("SendUpdateNotification", district.IdDistrict);
+            await _hubContext.Clients.All.SendAsync("SendUpdateNotification", district?.IdDistrict);
             return RedirectToAction(nameof(Index));
         }
+
 
         private bool DistrictExists(int id)
         {

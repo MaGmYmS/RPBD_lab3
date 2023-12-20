@@ -51,6 +51,16 @@
 
     <form asp-action="Delete">
         <input type="hidden" asp-for="IdCitizen" />
+
+        <label>
+            <input type="radio" name="deleteType" value="cascade" checked /> Каскадное удаление
+        </label>
+        <label>
+            <input type="radio" name="deleteType" value="nonCascade" /> Не каскадное удаление
+        </label>
+
+        <br /><br />
+
         <input type="submit" value="Удалить" class="btn btn-danger" /> |
         <a asp-action="Index">Вернуться к списку</a>
     </form>

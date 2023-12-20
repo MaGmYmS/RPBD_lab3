@@ -51,16 +51,16 @@
                     @Html.DisplayFor(modelItem => item.PostalCode)
                 </td>
                 <td>
-                    @Html.DisplayFor(modelItem => item.Area.NameArea)
+                    @(item.AreaId != null ? item.Area.NameArea : "Неизвестная область")
                 </td>
                 <td>
                     <a asp-action="Edit" asp-route-id="@item.IdCity" class="btn btn-edit">Редактировать</a>
                     <a asp-action="Delete" asp-route-id="@item.IdCity" class="btn btn-delete">Удалить</a>
                 </td>
-
             </tr>
         }
     </tbody>
+
 </table>
 
 @section scripts {

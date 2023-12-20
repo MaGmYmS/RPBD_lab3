@@ -29,11 +29,11 @@ namespace AreasDataBase.Models
         public double Area { get; set; }
 
 
-        [Required(ErrorMessage = "Значение не может быть пустым")]
+        //[Required(ErrorMessage = "Значение не может быть пустым")]
         [Display(Name = "Номер дома")]
         [Column("residential_building_id")]
         [ForeignKey("residential_building")]
-        public int ResidentialBuildingId { get; set; }
+        public int? ResidentialBuildingId { get; set; }
 
         public ResidentialBuilding? ResidentialBuilding { get; set; }
 

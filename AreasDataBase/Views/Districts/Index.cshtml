@@ -43,8 +43,9 @@
                     @Html.DisplayFor(modelItem => item.NameDistrict)
                 </td>
                 <td>
-                    @Html.DisplayFor(modelItem => item.City.NameCity)
+                    @(item.City?.NameCity ?? "Неизвестный город")
                 </td>
+
                 <td>
                     <a asp-action="Edit" asp-route-id="@item.IdDistrict" class="btn btn-edit">Редактировать</a>
                     <a asp-action="Delete" asp-route-id="@item.IdDistrict" class="btn btn-delete">Удалить</a>

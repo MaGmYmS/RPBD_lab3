@@ -46,18 +46,13 @@
                 <td>
                     @Html.DisplayFor(modelItem => item.NameStreet)
                 </td>
+
                 <td>
-                    @Html.DisplayFor(modelItem => item.District.NameDistrict)
+                        @(item.District?.NameDistrict ?? "Неизвестный район")
                 </td>
+
                 <td>
-                    @if (item.District != null && item.District.City != null)
-                    {
-                        @Html.DisplayFor(modelItem => item.District.City.NameCity)
-                    }
-                    else
-                    {
-                        @Html.Raw("null")
-                    }
+                        @(item.District?.City?.NameCity ?? "Неизвестный город")
                 </td>
 
                 <td>

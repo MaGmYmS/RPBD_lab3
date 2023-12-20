@@ -276,18 +276,31 @@ namespace AreasDataBase.Controllers
 
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> DeleteConfirmed(int id)
+        public async Task<IActionResult> DeleteConfirmed(int id, string deleteType)
         {
+            bool cascadeDelete = deleteType == "cascade";
+
             var residentialBuilding = await _context.ResidentialBuilding.FindAsync(id);
             if (residentialBuilding != null)
             {
+                if (!cascadeDelete)
+                {
+                    // Убираем связь здания с квартирами, если таковые есть
+                    var relatedApartments = _context.Apartment.Where(a => a.ResidentialBuildingId == id);
+                    foreach (var apartment in relatedApartments)
+                    {
+                        apartment.ResidentialBuildingId = null;
+                    }
+                }
+
                 _context.ResidentialBuilding.Remove(residentialBuilding);
             }
 
             await _context.SaveChangesAsync();
-            await _hubContext.Clients.All.SendAsync("SendUpdateNotification", residentialBuilding.IdResidentialBuilding);
+            await _hubContext.Clients.All.SendAsync("SendUpdateNotification", residentialBuilding?.IdResidentialBuilding);
             return RedirectToAction(nameof(Index));
         }
+
 
         private bool ResidentialBuildingExists(int id)
         {

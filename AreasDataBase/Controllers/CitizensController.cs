@@ -431,18 +431,20 @@ namespace AreasDataBase.Controllers
         // POST: Citizens/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> DeleteConfirmed(int id)
+        public async Task<IActionResult> DeleteConfirmed(int id, string deleteType)
         {
             var citizen = await _context.Citizen.FindAsync(id);
             if (citizen != null)
-            {
+            { 
                 _context.Citizen.Remove(citizen);
             }
 
             await _context.SaveChangesAsync();
-            await _hubContext.Clients.All.SendAsync("SendUpdateNotification", citizen.IdCitizen);
+            await _hubContext.Clients.All.SendAsync("SendUpdateNotification", citizen?.IdCitizen);
             return RedirectToAction(nameof(Index));
         }
+
+
 
         private bool CitizenExists(int id)
         {
