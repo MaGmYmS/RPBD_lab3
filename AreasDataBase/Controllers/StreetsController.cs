@@ -59,15 +59,25 @@ namespace AreasDataBase.Controllers
                 switch (searchColumn)
                 {
                     case "nameStreet":
-                        streetsQuery = streetsQuery.Where(s => s.NameStreet.ToLower().Contains(searchString.ToLower()));
+                        streetsQuery = streetsQuery.Where(s => s.NameStreet != null && s.NameStreet.ToLower().Contains(searchString.ToLower()));
                         break;
+
                     case "districtName":
-                        streetsQuery = streetsQuery.Where(s => s.District.NameDistrict.ToLower().Contains(searchString.ToLower()));
+                        streetsQuery = streetsQuery.Where(s => s.District != null ? s.District.NameDistrict.ToLower().Contains(searchString.ToLower()) : "неизвестный район".ToLower().Contains(searchString.ToLower()));
                         break;
-                    case "сityName": 
-                        streetsQuery = streetsQuery.Where(s => s.District.City.NameCity.ToLower().Contains(searchString.ToLower()));
+
+                    case "сityName":
+                        streetsQuery = streetsQuery.Where(s => s.District != null ?
+                                    (s.District.City != null ?
+                                    s.District.City.NameCity.ToLower().Contains(searchString.ToLower()) :
+                                    "неизвестный город".ToLower().Contains(searchString.ToLower())) :
+                                    "неизвестный город".ToLower().Contains(searchString.ToLower()));
                         break;
+
+                        // Для других кейсов, таких как улица и т.д., используйте аналогичный подход.
+
                 }
+
             }
 
             return View(await streetsQuery.ToListAsync());

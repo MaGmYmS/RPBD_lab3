@@ -20,7 +20,7 @@ namespace AreasDataBase.Data
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
-            optionsBuilder.UseNpgsql("Host=localhost; Database=RPBD_lab3.v11; Username=postgres; Password=ytn z yt uhb,");
+            optionsBuilder.UseNpgsql("Host=localhost; Database=RPBD_lab3.v14; Username=postgres; Password=ytn z yt uhb,");
         }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)

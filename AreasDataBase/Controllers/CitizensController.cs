@@ -11,8 +11,6 @@ using Microsoft.AspNetCore.SignalR;
 using OfficeOpenXml;
 using Xceed.Words.NET;
 using Xceed.Document.NET;
-using System.IO;
-using System.IO.Packaging;
 
 namespace AreasDataBase.Controllers
 {
@@ -138,7 +136,23 @@ namespace AreasDataBase.Controllers
                         if (DateTime.TryParse(searchString, out searchDate))
                         {
                             searchDate = DateTime.SpecifyKind(searchDate, DateTimeKind.Utc);
-                            citizens = citizens.Where(s => s.DateOfBirth.Date == searchDate.Date);
+                            List<Citizen> filteredCitizens = new List<Citizen>();
+
+                            foreach (var citizen in citizens)
+                            {
+                                DateTime sDate = DateTime.SpecifyKind(citizen.DateOfBirth, DateTimeKind.Utc).Date;
+
+                                if (sDate == searchDate.Date)
+                                {
+                                    filteredCitizens.Add(citizen);
+                                }
+                            }
+
+                            var result_tmp = filteredCitizens;
+                            _sortedFiltredCitizens = result_tmp;
+
+                            return View(result_tmp);
+
                         }
                         break;
 
@@ -155,45 +169,94 @@ namespace AreasDataBase.Controllers
                         }
                         break;
 
+                    //case "apartmentNumber":
+                    //    if (int.TryParse(searchString, out int apartmentNum))
+                    //    {
+                    //        citizens = citizens.Where(s => s.Apartment != null ? s.Apartment.ApartmentNumber == apartmentNum : "неизвестный номер квартиры".Contains(searchString));
+                    //    }
+                    //    break;
                     case "apartmentNumber":
                         if (int.TryParse(searchString, out int apartmentNum))
                         {
-                            citizens = citizens.Where(s => s.Apartment.ApartmentNumber == apartmentNum);
+                            citizens = citizens
+                                .Where(s => s.Apartment != null ?
+                                            s.Apartment.ApartmentNumber == apartmentNum :
+                                            "неизвестный номер квартиры".Contains(searchString.ToLower()));
                         }
                         break;
+
                     case "city":
-                        citizens = citizens.Where(s => s.Apartment.ResidentialBuilding.Street.District.City.NameCity.ToLower().Contains(searchString.ToLower()));
+                        citizens = citizens
+                            .Where(s => s.Apartment != null && s.Apartment.ResidentialBuilding != null && s.Apartment.ResidentialBuilding.Street != null &&
+                                        s.Apartment.ResidentialBuilding.Street.District != null && s.Apartment.ResidentialBuilding.Street.District.City != null ?
+                                         s.Apartment.ResidentialBuilding.Street.District.City.NameCity.ToLower().Contains(searchString.ToLower()) :
+                                         "неизвестный город".Contains(searchString.ToLower()));
                         break;
 
                     case "district":
-                        citizens = citizens.Where(s => s.Apartment.ResidentialBuilding.Street.District.NameDistrict.ToLower().Contains(searchString.ToLower())).AsQueryable();
+                        citizens = citizens
+                            .Where(s => s.Apartment != null && s.Apartment.ResidentialBuilding != null && s.Apartment.ResidentialBuilding.Street != null &&
+                                        (s.Apartment.ResidentialBuilding.Street.District != null ?
+                                         s.Apartment.ResidentialBuilding.Street.District.NameDistrict.ToLower().Contains(searchString.ToLower()) :
+                                         "неизвестный район".Contains(searchString.ToLower())));
                         break;
+
                     case "street":
-                        citizens = citizens.Where(s => s.Apartment.ResidentialBuilding.Street.NameStreet.ToLower().Contains(searchString.ToLower())).AsQueryable();
+                        citizens = citizens
+                            .Where(s => s.Apartment != null && s.Apartment.ResidentialBuilding != null ?
+                                        (s.Apartment.ResidentialBuilding.Street != null ?
+                                         s.Apartment.ResidentialBuilding.Street.NameStreet.ToLower().Contains(searchString.ToLower()) :
+                                         "неизвестная улица".Contains(searchString.ToLower())) :
+                                        false);
                         break;
-                    //case "houseNumber":
 
-                    //    if (!string.IsNullOrEmpty(searchString))
-                    //    {
-                    //        citizens = citizens
-                    //            .Where(c => c.Apartment.ResidentialBuilding.HouseNumber.ToString().Contains(searchString));
-                    //    }
+                    case "houseNumber":
+                        if (!string.IsNullOrEmpty(searchString))
+                        {
+                            List<Citizen> filteredCitizens = new List<Citizen>();
 
+                            foreach (var citizen in citizens)
+                            {
+                                if (citizen.Apartment != null && citizen.Apartment.ResidentialBuilding != null)
+                                {
+                                    string houseNumber = citizen.Apartment.ResidentialBuilding.HouseNumber;
 
-                    //    //citizens = citizens
-                    //    //    .Where(c => EF.Functions.Like(c.Apartment.ResidentialBuilding.HouseNumber.ToString(), $"%{searchString}%"));
-                    //    break;
+                                    if (houseNumber != null && houseNumber.ToLower().Contains(searchString.ToLower()))
+                                    {
+                                        filteredCitizens.Add(citizen);
+                                    }
+                                    else if (houseNumber == null && "неизвестный номер дома".ToLower().Contains(searchString.ToLower()))
+                                    {
+                                        filteredCitizens.Add(citizen);
+                                    }
+                                }
+                                else 
+                                {
+                                    filteredCitizens.Add(citizen);
+                                }
+                            }
+
+                            citizens = filteredCitizens.AsQueryable();
+                        }
+
+                        break;
 
 
 
                 }
-
             }
-            var result = await citizens.ToListAsync();
             _sortedFiltredCitizens = citizens.ToList();
 
-            return View(result);
+            return View(citizens);
         }
+
+        [HttpGet]
+        public JsonResult CheckCitizensCount()
+        {
+            bool hasCitizens = _sortedFiltredCitizens != null && _sortedFiltredCitizens.Count > 0;
+            return Json(new { hasCitizens });
+        }
+
 
         [HttpGet]
         public IActionResult ExportCitizensToExcel()
@@ -229,11 +292,11 @@ namespace AreasDataBase.Controllers
                     worksheet.Cells[i + 2, 3].Value = citizen.PhoneNumber;
                     worksheet.Cells[i + 2, 4].Value = citizen.DateOfBirth.ToString("dd.MM.yyyy");
                     worksheet.Cells[i + 2, 5].Value = citizen.Gender ? "Мужской" : "Женский";
-                    worksheet.Cells[i + 2, 6].Value = citizen.Apartment.ApartmentNumber;
-                    worksheet.Cells[i + 2, 7].Value = citizen.Apartment.ResidentialBuilding.Street.District.City.NameCity;
-                    worksheet.Cells[i + 2, 8].Value = citizen.Apartment.ResidentialBuilding.Street.District.NameDistrict;
-                    worksheet.Cells[i + 2, 9].Value = citizen.Apartment.ResidentialBuilding.Street.NameStreet;
-                    worksheet.Cells[i + 2, 10].Value = citizen.Apartment.ResidentialBuilding.HouseNumber;
+                    worksheet.Cells[i + 2, 6].Value = citizen.Apartment?.ApartmentNumber.ToString() ?? "Неизвестная квартира";
+                    worksheet.Cells[i + 2, 7].Value = citizen.Apartment?.ResidentialBuilding?.Street?.District?.City?.NameCity ?? "Неизвестный город";
+                    worksheet.Cells[i + 2, 8].Value = citizen.Apartment?.ResidentialBuilding?.Street?.District?.NameDistrict ?? "Неизвестный район";
+                    worksheet.Cells[i + 2, 9].Value = citizen.Apartment?.ResidentialBuilding?.Street?.NameStreet ?? "Неизвестная улица";
+                    worksheet.Cells[i + 2, 10].Value = citizen.Apartment?.ResidentialBuilding?.HouseNumber ?? "Неизвестный дом";
                 }
 
                 // Устанавливаем автоширину для всех столбцов
@@ -262,7 +325,7 @@ namespace AreasDataBase.Controllers
                 doc.InsertParagraph("Список граждан").FontSize(20d).Bold().Alignment = Alignment.center;
 
                 // Добавляем таблицу
-                var table = doc.AddTable(_sortedFiltredCitizens.Count + 1, 10);
+                var table = doc.InsertTable(_sortedFiltredCitizens.Count + 1, 10);
                 table.Design = TableDesign.TableGrid;
 
                 // Добавляем заголовки таблицы
@@ -277,7 +340,6 @@ namespace AreasDataBase.Controllers
                 table.Rows[0].Cells[8].Paragraphs.First().Append("Улица");
                 table.Rows[0].Cells[9].Paragraphs.First().Append("Номер дома");
 
-                // Заполняем таблицу данными
                 for (int i = 0; i < _sortedFiltredCitizens.Count; i++)
                 {
                     var citizen = _sortedFiltredCitizens[i];
@@ -287,15 +349,13 @@ namespace AreasDataBase.Controllers
                     table.Rows[i + 1].Cells[2].Paragraphs.First().Append(citizen.PhoneNumber.ToString());
                     table.Rows[i + 1].Cells[3].Paragraphs.First().Append(citizen.DateOfBirth.ToString("dd.MM.yyyy"));
                     table.Rows[i + 1].Cells[4].Paragraphs.First().Append(citizen.Gender ? "Мужской" : "Женский");
-                    table.Rows[i + 1].Cells[5].Paragraphs.First().Append(citizen.Apartment.ApartmentNumber.ToString());
-                    table.Rows[i + 1].Cells[6].Paragraphs.First().Append(citizen.Apartment.ResidentialBuilding.Street.District.City.NameCity);
-                    table.Rows[i + 1].Cells[7].Paragraphs.First().Append(citizen.Apartment.ResidentialBuilding.Street.District.NameDistrict);
-                    table.Rows[i + 1].Cells[8].Paragraphs.First().Append(citizen.Apartment.ResidentialBuilding.Street.NameStreet);
-                    table.Rows[i + 1].Cells[9].Paragraphs.First().Append(citizen.Apartment.ResidentialBuilding.HouseNumber.ToString());
+                    table.Rows[i + 1].Cells[5].Paragraphs.First().Append(citizen.Apartment?.ApartmentNumber.ToString() ?? "Неизвестная квартира");
+                    table.Rows[i + 1].Cells[6].Paragraphs.First().Append(citizen.Apartment?.ResidentialBuilding?.Street?.District?.City?.NameCity ?? "Неизвестный город");
+                    table.Rows[i + 1].Cells[7].Paragraphs.First().Append(citizen.Apartment?.ResidentialBuilding?.Street?.District?.NameDistrict ?? "Неизвестный район");
+                    table.Rows[i + 1].Cells[8].Paragraphs.First().Append(citizen.Apartment?.ResidentialBuilding?.Street?.NameStreet ?? "Неизвестная улица");
+                    table.Rows[i + 1].Cells[9].Paragraphs.First().Append(citizen.Apartment?.ResidentialBuilding?.HouseNumber?.ToString() ?? "Неизвестный дом");
                 }
 
-                // Сохраняем документ
-                //doc.Save();
 
                 var memoryStream = new MemoryStream();
                 doc.SaveAs(memoryStream);
@@ -324,6 +384,7 @@ namespace AreasDataBase.Controllers
         {
             if (ModelState.IsValid)
             {
+                citizen.DateOfBirth = citizen.DateOfBirth.ToUniversalTime();
                 _context.Add(citizen);
                 await _context.SaveChangesAsync();
                 await _hubContext.Clients.All.SendAsync("SendUpdateNotification", citizen.IdCitizen);
@@ -380,6 +441,7 @@ namespace AreasDataBase.Controllers
             {
                 try
                 {
+                    citizen.DateOfBirth = citizen.DateOfBirth.ToUniversalTime();
                     _context.Update(citizen);
                     await _context.SaveChangesAsync();
                     await _hubContext.Clients.All.SendAsync("SendUpdateNotification", citizen.IdCitizen);

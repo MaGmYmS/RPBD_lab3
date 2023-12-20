@@ -103,14 +103,14 @@ namespace AreasDataBase.Models
         {
             if (value is DateTime dateOfBirth)
             {
-                if (dateOfBirth > DateTime.Now)
+                if (dateOfBirth > DateTime.UtcNow)
                 {
                     return new ValidationResult("Дата рождения не может быть в будущем.");
                 }
 
-                int age = DateTime.Now.Year - dateOfBirth.Year;
+                int age = DateTime.UtcNow.Year - dateOfBirth.Year;
 
-                if (DateTime.Now < dateOfBirth.AddYears(age))
+                if (DateTime.UtcNow < dateOfBirth.AddYears(age))
                 {
                     age--;
                 }

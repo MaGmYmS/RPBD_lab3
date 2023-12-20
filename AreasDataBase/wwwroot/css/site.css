@@ -77,38 +77,40 @@ a {
 
 
 
-
-
-
-
-/* Заголовки таблицы */
-.table th {
-    background-color: #d15f4f;
-    color: #331a0c;
-    font-weight: bold; /* Жирный шрифт для заголовков */
+/* Установите одинаковую ширину для формы и таблицы */
+#searchForm, #table-wrapper {
+    width: 100%;
+    display: inline-block;
+    overflow-x: auto; /* Добавляем горизонтальный скролл при необходимости */
 }
 
-/* Подсветка строк при наведении */
-/*.table tbody tr:hover {
-    background-color: #471014;*/ /* Нежный серый цвет при наведении */
-/*}*/
-/* Границы ячеек */
-.table td, .table th {
-    /*border: 0.001px solid #d15f4f;*/ /* Светлая тень для границ ячеек */
-    padding: 0.3rem; /* Отступ внутри ячейки */
+/* Уберите внешние отступы у формы и таблицы */
+#searchForm, #table-wrapper {
+    margin: 0;
+    padding: 0;
 }
 
-/* Выравнивание текста в ячейках по центру */
-.table th, .table td {
-    text-align: center;
-    vertical-align: middle; /* Добавленное выравнивание по вертикали */
+/* Установите таблицу на всю ширину контейнера и уберите внешние отступы у строк и ячеек */
+.table {
+    width: 100%;
+    border-collapse: collapse;
+    text-align: center; /* Выравнивание текста по центру для всей таблицы */
 }
 
+    .table th, .table td {
+        padding: 0.5rem;
+        border: 1px solid #ccc; /* если нужны границы для ячеек и заголовков */
+        text-align: center; /* Выравнивание текста по центру в ячейках и заголовках */
+        vertical-align: middle; /* Выравнивание текста по центру вертикально */
+    }
 
 /* Добавим немного тени для подчеркивания границ таблицы */
 .table {
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Тень для таблицы */
 }
+
+
+
 
 
 
@@ -139,14 +141,14 @@ button {
 .btn-edit,
 .btn-delete {
     display: inline-block;
-    padding: 0.5rem 1rem;
+    padding: 0.5rem 0.5rem;
     text-align: center;
     text-decoration: none;
     cursor: pointer;
     border-radius: 4px;
     transition: background-color 0.3s ease;
     width: auto; /* Ширина установлена в авто */
-    min-width: 130px; /* Минимальная ширина для кнопок (можно установить другое значение) */
+    min-width: 120px; /* Минимальная ширина для кнопок (можно установить другое значение) */
 }
 
 .btn-edit {

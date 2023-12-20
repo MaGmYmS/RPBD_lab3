@@ -38,7 +38,6 @@
 </form>
 
 
-
 <div id="table-wrapper">
     <table class="table">
         <thead>
@@ -184,12 +183,33 @@
 
     <script>
         document.getElementById('exportExcelButton').addEventListener('click', function () {
-            window.location.href = '@Url.Action("ExportCitizensToExcel", "Citizens")';
+            checkCitizensAndExport('@Url.Action("ExportCitizensToExcel", "Citizens")');
         });
 
         document.getElementById('exportWordButton').addEventListener('click', function () {
-            window.location.href = '@Url.Action("ExportCitizensToWord", "Citizens")';
+            checkCitizensAndExport('@Url.Action("ExportCitizensToWord", "Citizens")');
         });
+
+        function checkCitizensAndExport(url) {
+            fetch('@Url.Action("CheckCitizensCount", "Citizens")', {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.hasCitizens) {
+                        window.location.href = url;
+                    } else {
+                        alert('Нет данных для экспорта.');
+                    }
+                })
+                .catch(error => {
+                    console.error('Ошибка при проверке данных:', error);
+                    alert('Произошла ошибка при проверке данных.');
+                });
+        }
 
     </script>
 
@@ -201,4 +221,13 @@
         });
     </script>
 
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            var errorMessage = '@TempData["ErrorMessage"]';
+            if (errorMessage) {
+                alert(errorMessage);
+            }
+        });
+
+    </script>
 }

@@ -82,7 +82,7 @@ namespace AreasDataBase.Controllers
                 {
                     case "houseNumber":
                         residentialBuildingsQuery = residentialBuildingsQuery
-                            .Where(r => EF.Functions.Like(r.HouseNumber, $"%{searchString}%"));
+                            .Where(r => r.HouseNumber != null && EF.Functions.Like(r.HouseNumber, $"%{searchString}%"));
                         break;
 
                     case "YearOfConstruction":
@@ -102,19 +102,26 @@ namespace AreasDataBase.Controllers
                         break;
 
                     case "streetName":
-                        residentialBuildingsQuery = residentialBuildingsQuery.Where(s => s.Street.NameStreet.ToLower().Contains(searchString.ToLower()));
+                        residentialBuildingsQuery = residentialBuildingsQuery
+                            .Where(s => s.Street != null ? s.Street.NameStreet.ToLower().Contains(searchString.ToLower()) : "неизвестная улица".ToLower().Contains(searchString.ToLower()));
                         break;
 
                     case "districtName":
-                        residentialBuildingsQuery = residentialBuildingsQuery.Where(s => s.Street.District.NameDistrict.ToLower().Contains(searchString.ToLower()));
+                        residentialBuildingsQuery = residentialBuildingsQuery
+                            .Where(s => s.Street != null && s.Street.District != null ?
+                                        s.Street.District.NameDistrict.ToLower().Contains(searchString.ToLower()) :
+                                        "неизвестный район".ToLower().Contains(searchString.ToLower()));
                         break;
 
                     case "cityName":
-                        residentialBuildingsQuery = residentialBuildingsQuery.Where(s => s.Street.District.City.NameCity.ToLower().Contains(searchString.ToLower()));
+                        residentialBuildingsQuery = residentialBuildingsQuery
+                            .Where(s => s.Street != null && s.Street.District != null && s.Street.District.City != null ?
+                                        s.Street.District.City.NameCity.ToLower().Contains(searchString.ToLower()) :
+                                        "неизвестный город".ToLower().Contains(searchString.ToLower()));
                         break;
 
-                }
 
+                }
             }
 
             return View(await residentialBuildingsQuery.ToListAsync());

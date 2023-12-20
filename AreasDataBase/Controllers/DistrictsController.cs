@@ -48,14 +48,13 @@ namespace AreasDataBase.Controllers
 
             if (!String.IsNullOrEmpty(searchString))
             {
-                // Используйте выбранный столбец для поиска
                 switch (searchColumn)
                 {
                     case "nameDistrict":
                         districtsQuery = districtsQuery.Where(s => s.NameDistrict.ToLower().Contains(searchString.ToLower()));
                         break;
                     case "cityName":
-                        districtsQuery = districtsQuery.Where(s => s.City.NameCity.ToLower().Contains(searchString.ToLower()));
+                        districtsQuery = districtsQuery.Where(s => s.City != null ? s.City.NameCity.ToLower().Contains(searchString.ToLower()) : "неизвестный город".ToLower().Contains(searchString.ToLower()));
                         break;
                 }
             }

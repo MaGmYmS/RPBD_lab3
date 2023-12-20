@@ -66,7 +66,7 @@ namespace AreasDataBase.Controllers
                         }
                         break;
                     case "areaName":
-                        citiesQuery = citiesQuery.Where(s => s.Area.NameArea.ToLower().Contains(searchString.ToLower()));
+                        citiesQuery = citiesQuery.Where(s => s.Area != null ? s.Area.NameArea.ToLower().Contains(searchString.ToLower()) : "неизвестная область".ToLower().Contains(searchString.ToLower()));
                         break;
                 }
             }

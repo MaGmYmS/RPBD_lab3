@@ -111,18 +111,39 @@ namespace AreasDataBase.Controllers
                         break;
 
                     case "residentialBuilding.houseNumber":
-                        apartmentsQuery = apartmentsQuery.Where(s => s.ResidentialBuilding.HouseNumber.ToLower().Contains(searchString.ToLower()));
+                        apartmentsQuery = apartmentsQuery
+                            .Where(s => s.ResidentialBuilding != null ?
+                                        s.ResidentialBuilding.HouseNumber != null &&
+                                        s.ResidentialBuilding.HouseNumber.ToLower().Contains(searchString.ToLower()) :
+                                        "неизвестный номер дома".ToLower().Contains(searchString.ToLower()));
                         break;
-                    case "residentialBuilding.Street.District.City.NameCity":
-                        apartmentsQuery = apartmentsQuery.Where(s => s.ResidentialBuilding.Street.District.City.NameCity.ToLower().Contains(searchString.ToLower()));
-                        break;
-                    case "residentialBuilding.Street.District.NameDistrict":
-                        apartmentsQuery = apartmentsQuery.Where(s => s.ResidentialBuilding.Street.District.NameDistrict.ToLower().Contains(searchString.ToLower()));
-                        break;
+
+
                     case "residentialBuilding.Street.NameStreet":
-                        apartmentsQuery = apartmentsQuery.Where(s => s.ResidentialBuilding.Street.NameStreet.ToLower().Contains(searchString.ToLower()));
+                        apartmentsQuery = apartmentsQuery
+                            .Where(s => s.ResidentialBuilding != null && s.ResidentialBuilding.Street != null ?
+                                        s.ResidentialBuilding.Street.NameStreet != null &&
+                                        s.ResidentialBuilding.Street.NameStreet.ToLower().Contains(searchString.ToLower()) :
+                                        "неизвестная улица".ToLower().Contains(searchString.ToLower()));
+                        break;
+
+                    case "residentialBuilding.Street.District.NameDistrict":
+                        apartmentsQuery = apartmentsQuery
+                            .Where(s => s.ResidentialBuilding != null && s.ResidentialBuilding.Street != null && s.ResidentialBuilding.Street.District != null ?
+                                        s.ResidentialBuilding.Street.District.NameDistrict != null &&
+                                        s.ResidentialBuilding.Street.District.NameDistrict.ToLower().Contains(searchString.ToLower()) :
+                                        "неизвестный район".ToLower().Contains(searchString.ToLower()));
+                        break;
+
+                    case "residentialBuilding.Street.District.City.NameCity":
+                        apartmentsQuery = apartmentsQuery
+                            .Where(s => s.ResidentialBuilding.Street.District != null &&
+                                        s.ResidentialBuilding.Street.District.City != null ?
+                                        s.ResidentialBuilding.Street.District.City.NameCity.ToLower().Contains(searchString.ToLower()) :
+                                        "неизвестный город".ToLower().Contains(searchString.ToLower()));
                         break;
                 }
+
             }
 
             return View(await apartmentsQuery.ToListAsync());
