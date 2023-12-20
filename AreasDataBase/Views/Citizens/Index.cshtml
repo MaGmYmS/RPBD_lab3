@@ -18,10 +18,8 @@
 
 <form id="searchForm" asp-action="Index">
     <div class="input-group md-form form-sm form2 pl-0">
-        <input id="searchString" name="searchString" class="form-control my-0 py-1 red-border" type="text" placeholder="Поиск" aria-label="Поиск" value="@ViewBag.CurrentFilter" />
-        <div class="input-group-append"></div>
-        <select id="searchColumn" name="searchColumn" class="form-control">
-            <option value="fullName">Полное имя</option>
+        <select id="searchColumn" name="searchColumn" class="form-control custom-select">
+            <option value="fullName" selected>Полное имя</option>
             <option value="passportData">Паспортные данные</option>
             <option value="phoneNumber">Номер телефона</option>
             <option value="dateOfBirth">Дата рождения</option>
@@ -30,11 +28,15 @@
             <option value="city">Название города</option>
             <option value="district">Название района</option>
             <option value="street">Название улицы</option>
-            @* <option value="houseNumber">Номер дома</option> *@
+            <option value="houseNumber">Номер дома</option>
         </select>
+        <div class="input-group-append"></div>
+        <input id="searchString" name="searchString" class="form-control my-0 py-1 red-border" type="text" placeholder="Поиск" aria-label="Поиск" />
         <button type="submit" class="btn btn-primary">Поиск</button>
+        <button type="button" id="resetSearch" class="btn btn-secondary">Сбросить</button>
     </div>
 </form>
+
 
 
 <div id="table-wrapper">
@@ -140,7 +142,15 @@
                 localStorage.setItem("searchColumn", $("#searchColumn").val());
             });
 
-            // При загрузке страницы восстанавливаем значения из localStorage
+            // При нажатии на кнопку "Сбросить" очищаем значения в localStorage
+            $("#resetSearch").click(function () {
+                console.log("Сброс кнопки нажат");
+                localStorage.removeItem("searchString");
+                localStorage.removeItem("searchColumn");
+                $("#searchString").val("");  // Очищаем значение поля ввода
+                $("#searchColumn").val("");  // Очищаем значение выпадающего списка
+            });
+
             var savedSearchString = localStorage.getItem("searchString");
             var savedSearchColumn = localStorage.getItem("searchColumn");
 
@@ -152,6 +162,7 @@
                 $("#searchColumn").val(savedSearchColumn);
             }
         });
+
     </script>
 
     <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
@@ -180,6 +191,14 @@
             window.location.href = '@Url.Action("ExportCitizensToWord", "Citizens")';
         });
 
+    </script>
+
+    <script>
+        document.getElementById('resetSearch').addEventListener('click', function () {
+            document.getElementById('searchForm').reset();
+
+            window.location.href = '@Url.Action("Index", "Citizens")';
+        });
     </script>
 
 }
