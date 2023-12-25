@@ -67,13 +67,43 @@
 
     <script>
         $(document).ready(function () {
-            // Устанавливаем выбранные значения из модели
-            var selectedCityId = '@Model.ResidentialBuilding.Street.District.CityId';
-            var selectedDistrictId = '@Model.ResidentialBuilding.Street.DistrictId';
-            var selectedStreetId = '@Model.ResidentialBuilding.StreetId';
-            var selectedBuildingId = '@Model.ResidentialBuildingId';
 
+
+
+            // Значения из модели
+            var selectedCityId = '@(Model?.ResidentialBuilding?.Street?.District?.CityId.ToString()  ?? "")';
+            var selectedDistrictId = '@(Model?.ResidentialBuilding?.Street?.DistrictId.ToString()  ?? "")';
+            var selectedStreetId = '@(Model?.ResidentialBuilding?.StreetId.ToString()  ?? "")';
+            var selectedBuildingId = '@(Model?.ResidentialBuildingId.ToString()  ?? "")';
+
+            // Устанавливаем выбранные значения по умолчанию
             $('#CityId').val(selectedCityId);
+            $('#DistrictId').val(selectedDistrictId);
+            $('#StreetId').val(selectedStreetId);
+            $('#ResidentialBuildingId').val(selectedBuildingId);
+
+            console.log("Selected values from model:", {
+                selectedCityId,
+                selectedDistrictId,
+                selectedStreetId,
+                selectedBuildingId
+            });
+
+            // if (selectedCityId) {
+            //     $('#CityId').val(selectedCityId);
+            // }
+
+            // if (selectedDistrictId) {
+            //     $('#DistrictId').val(selectedDistrictId);
+            // }
+
+            // if (selectedStreetId) {
+            //     $('#StreetId').val(selectedStreetId);
+            // }
+
+            // if (selectedBuildingId) {
+            //     $('#ResidentialBuildingId').val(selectedBuildingId);
+            // }
 
             // Загрузка районов при открытии формы
             $.ajax({

@@ -169,12 +169,6 @@ namespace AreasDataBase.Controllers
                         }
                         break;
 
-                    //case "apartmentNumber":
-                    //    if (int.TryParse(searchString, out int apartmentNum))
-                    //    {
-                    //        citizens = citizens.Where(s => s.Apartment != null ? s.Apartment.ApartmentNumber == apartmentNum : "неизвестный номер квартиры".Contains(searchString));
-                    //    }
-                    //    break;
                     case "apartmentNumber":
                         if (int.TryParse(searchString, out int apartmentNum))
                         {
@@ -407,10 +401,10 @@ namespace AreasDataBase.Controllers
 
             var citizen = await _context.Citizen
                 .Include(c => c.Apartment)
-                .ThenInclude(a => a.ResidentialBuilding)
-                .ThenInclude(rb => rb.Street)
-                .ThenInclude(s => s.District)
-                .ThenInclude(d => d.City)
+                    .ThenInclude(a => a.ResidentialBuilding)
+                        .ThenInclude(rb => rb.Street)
+                            .ThenInclude(s => s.District)
+                                .ThenInclude(d => d.City)
                 .FirstOrDefaultAsync(c => c.IdCitizen == id);
 
             if (citizen == null)
@@ -418,12 +412,7 @@ namespace AreasDataBase.Controllers
                 return NotFound();
             }
 
-            // Загрузка списков для дропдаунов
-            ViewData["CityId"] = new SelectList(_context.City, "IdCity", "NameCity", citizen?.Apartment?.ResidentialBuilding?.Street?.District?.CityId);
-            ViewData["DistrictId"] = new SelectList(_context.District, "IdDistrict", "NameDistrict", citizen?.Apartment?.ResidentialBuilding?.Street?.DistrictId);
-            ViewData["StreetId"] = new SelectList(_context.Street, "IdStreet", "NameStreet", citizen?.Apartment?.ResidentialBuilding?.StreetId);
-            ViewData["ResidentialBuildingId"] = new SelectList(_context.ResidentialBuilding, "IdResidentialBuilding", "HouseNumber", citizen?.Apartment?.ResidentialBuildingId);
-            ViewData["ApartmentId"] = new SelectList(_context.Apartment, "IdApartment", "ApartmentNumber", citizen.ApartmentId);
+            SetViewBagsForDropdowns(citizen);
 
             return View(citizen);
         }
@@ -445,6 +434,7 @@ namespace AreasDataBase.Controllers
                     _context.Update(citizen);
                     await _context.SaveChangesAsync();
                     await _hubContext.Clients.All.SendAsync("SendUpdateNotification", citizen.IdCitizen);
+                    return RedirectToAction(nameof(Index));
                 }
                 catch (DbUpdateConcurrencyException)
                 {
@@ -457,18 +447,67 @@ namespace AreasDataBase.Controllers
                         throw;
                     }
                 }
-                return RedirectToAction(nameof(Index));
             }
 
-            // Загрузка списков для дропдаунов в случае ошибки валидации
-            ViewData["CityId"] = new SelectList(_context.City, "IdCity", "NameCity", citizen?.Apartment?.ResidentialBuilding?.Street?.District?.CityId);
-            ViewData["DistrictId"] = new SelectList(_context.District, "IdDistrict", "NameDistrict", citizen?.Apartment?.ResidentialBuilding?.Street?.DistrictId);
-            ViewData["StreetId"] = new SelectList(_context.Street, "IdStreet", "NameStreet", citizen?.Apartment?.ResidentialBuilding?.StreetId);
-            ViewData["ResidentialBuildingId"] = new SelectList(_context.ResidentialBuilding, "IdResidentialBuilding", "HouseNumber", citizen?.Apartment?.ResidentialBuildingId);
-            ViewData["ApartmentId"] = new SelectList(_context.Apartment, "IdApartment", "ApartmentNumber", citizen.ApartmentId);
-
+            SetViewBagsForDropdowns(citizen);
             return View(citizen);
         }
+
+        private void SetViewBagsForDropdowns(Citizen citizen)
+        {
+            if (citizen?.Apartment != null &&
+                citizen.Apartment.ResidentialBuilding != null &&
+                citizen.Apartment.ResidentialBuilding.Street != null &&
+                citizen.Apartment.ResidentialBuilding.Street.District != null &&
+                citizen.Apartment.ResidentialBuilding.Street.District.CityId.HasValue)
+            {
+                ViewData["DistrictId"] = new SelectList(_context.District, "IdDistrict", "NameDistrict", citizen.Apartment.ResidentialBuilding.Street.DistrictId);
+                ViewData["CityId"] = new SelectList(_context.City, "IdCity", "NameCity", citizen.Apartment.ResidentialBuilding.Street.District.CityId);
+                ViewData["StreetId"] = new SelectList(_context.Street, "IdStreet", "NameStreet", citizen.Apartment.ResidentialBuilding.StreetId);
+            }
+            else
+            {
+                var districts = new List<SelectListItem>
+                {
+                    new SelectListItem { Value = "", Text = "", Selected = true }
+                };
+                districts.AddRange(_context.District.Select(d => new SelectListItem { Value = d.IdDistrict.ToString(), Text = d.NameDistrict }));
+                ViewData["DistrictId"] = districts;
+
+                var cities = new List<SelectListItem>
+                {
+                    new SelectListItem { Value = "", Text = "", Selected = true }
+                };
+                cities.AddRange(_context.City.Select(c => new SelectListItem { Value = c.IdCity.ToString(), Text = c.NameCity }));
+                ViewData["CityId"] = cities;
+
+                var streets = new List<SelectListItem>
+                {
+                    new SelectListItem { Value = "", Text = "", Selected = true }
+                };
+                streets.AddRange(_context.Street.Select(s => new SelectListItem { Value = s.IdStreet.ToString(), Text = s.NameStreet }));
+                ViewData["StreetId"] = streets;
+            }
+
+            if (citizen.Apartment?.ResidentialBuildingId.HasValue == true)
+            {
+                ViewData["ResidentialBuildingId"] = new SelectList(_context.ResidentialBuilding, "IdResidentialBuilding", "HouseNumber", citizen.Apartment.ResidentialBuildingId);
+            }
+            else
+            {
+                ViewData["ResidentialBuildingId"] = new SelectList(_context.ResidentialBuilding, "IdResidentialBuilding", "HouseNumber");
+            }
+
+            if (citizen?.ApartmentId.HasValue == true)
+            {
+                ViewData["ApartmentId"] = new SelectList(_context.Apartment, "IdApartment", "ApartmentNumber", citizen.ApartmentId);
+            }
+            else
+            {
+                ViewData["ApartmentId"] = new SelectList(_context.Apartment, "IdApartment", "ApartmentNumber");
+            }
+        }
+
 
 
         // GET: Citizens/Delete/5
