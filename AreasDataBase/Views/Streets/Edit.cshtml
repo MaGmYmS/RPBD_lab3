@@ -43,61 +43,6 @@
     @{
         await Html.RenderPartialAsync("_ValidationScriptsPartial");
     }
-@*     <script>
-        $(document).ready(function () {
-            // Сохраняем изначальные значения для города и районов
-            var originalCity = $('#District_CityId').html();
-            var originalDistricts = $('#DistrictId').html();
-
-            var selectedCity = '@Model?.District?.CityId';
-            var selectedDistrict = '@Model?.DistrictId';
-
-            // Загрузка списков при открытии формы редактирования
-            $.ajax({
-                type: 'GET',
-                url: '/api/location/districts/' + selectedCity,
-                success: function (data) {
-                    var cityDropdown = $('#cityDropdown');
-                    cityDropdown.empty();
-                    $.each(data.cities, function (i, city) {
-                        cityDropdown.append($('<option/>').val(city.idCity).text(city.nameCity));
-                    });
-
-                    // Установка выбранного города при открытии формы
-                    cityDropdown.val(selectedCity);
-
-                    var districtDropdown = $('#DistrictId');
-                    districtDropdown.empty();
-                    $.each(data.districts, function (i, district) {
-                        districtDropdown.append($('<option/>').val(district.idDistrict).text(district.nameDistrict));
-                    });
-
-                    // Установка выбранного района при открытии формы
-                    districtDropdown.val(selectedDistrict);
-                }
-            });
-
-            // Обработчик изменения города
-            $("#cityDropdown").change(function () {
-                var cityId = $(this).val();
-                $.ajax({
-                    type: 'GET',
-                    url: '/api/location/districts/' + cityId,
-                    success: function (data) {
-                        var districtDropdown = $('#DistrictId');
-                        districtDropdown.empty();
-                        $.each(data, function (i, district) {
-                            districtDropdown.append($('<option/>').val(district.idDistrict).text(district.nameDistrict));
-                        });
-
-                        // Сброс выбранного района при изменении города
-                        $('#DistrictId').val('');
-                    }
-                });
-            });
-        });
-    </script> *@
-
 
     <script>
         $(document).ready(function () {
@@ -105,21 +50,37 @@
             var originalCity = $('#District_CityId').html();
             var originalDistricts = $('#DistrictId').html();
 
-            var selectedCity = '@Model?.District?.CityId';
-            var selectedDistrict = '@Model?.DistrictId';
+            var selectedCity = '@(Model?.District?.CityId.ToString() ?? "")';
+            var selectedDistrict = '@(Model?.DistrictId.ToString() ?? "")';
+
+            console.log("Изначальный выбранный город:", selectedCity.nameCity);
+            console.log("Изначально выбранный район:", selectedDistrict.nameDistrict);
 
             // Загрузка списков при открытии формы редактирования
-            loadCities(selectedCity, function () {
-                loadDistricts(selectedCity, function () {
-                    // Установка выбранных значений после полной загрузки списков
-                    $('#cityDropdown').val(selectedCity);
-                    $('#DistrictId').val(selectedDistrict);
+            if (selectedCity) {
+                loadCities(selectedCity, function () {
+                    console.log("Загрузили город");
+                    loadDistricts(selectedCity, function () {
+                        console.log("Загрузили район");
+                        // Установка выбранных значений после полной загрузки списков
+                        $('#cityDropdown').val(selectedCity);
+                        console.log("Установлен город после загрузки:", $('#cityDropdown').val());
+
+                        $('#DistrictId').val(selectedDistrict);
+                        console.log("Установлен район после загрузки:", $('#DistrictId').val());
+                    });
                 });
-            });
+            } else {
+                // Если город не выбран, зануляем список районов и устанавливаем список городов без выбранного значения
+                $('#DistrictId').html(originalDistricts); // возвращаем исходный список районов
+                $('#cityDropdown').val(""); // устанавливаем город без выбранного значения
+                console.log("Город не выбран. Список районов занулен.");
+            }
 
             // Обработчик изменения города
             $("#cityDropdown").change(function () {
                 var cityId = $(this).val();
+                console.log("Выбран новый город:", cityId);
                 loadDistricts(cityId);
             });
 
@@ -156,6 +117,7 @@
             }
         });
     </script>
+
 
 
 }

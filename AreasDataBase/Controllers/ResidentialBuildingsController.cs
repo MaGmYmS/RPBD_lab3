@@ -190,25 +190,10 @@ namespace AreasDataBase.Controllers
                 return NotFound();
             }
 
-            ViewBag.CityId = new SelectList(_context.City, "IdCity", "NameCity", residentialBuilding.Street.District.CityId);
-
-            ViewBag.DistrictId = new SelectList(
-                _context.District.Where(d => d.CityId == residentialBuilding.Street.District.CityId),
-                "IdDistrict",
-                "NameDistrict",
-                residentialBuilding.Street.DistrictId
-            );
-
-            ViewBag.StreetId = new SelectList(
-                _context.Street.Where(s => s.DistrictId == residentialBuilding.Street.DistrictId),
-                "IdStreet",
-                "NameStreet",
-                residentialBuilding.StreetId
-            );
+            SetViewBagsForDropdowns(residentialBuilding);
 
             return View(residentialBuilding);
         }
-
 
         [HttpPost]
         [ValidateAntiForgeryToken]
@@ -229,7 +214,6 @@ namespace AreasDataBase.Controllers
                     residentialBuilding.Street.District = district;
                 }
 
-                // Проверяем уникальность дома и названия улицы
                 if (_context.ResidentialBuilding.Any(rb => rb.HouseNumber == residentialBuilding.HouseNumber && rb.StreetId == residentialBuilding.StreetId && rb.IdResidentialBuilding != id))
                 {
                     ModelState.AddModelError("HouseNumber", "Такой дом уже существует на выбранной улице.");
@@ -241,6 +225,8 @@ namespace AreasDataBase.Controllers
                         _context.Update(residentialBuilding);
                         await _context.SaveChangesAsync();
                         await _hubContext.Clients.All.SendAsync("SendUpdateNotification", residentialBuilding.IdResidentialBuilding);
+
+                        return RedirectToAction(nameof(Index));
                     }
                     catch (DbUpdateConcurrencyException)
                     {
@@ -253,14 +239,47 @@ namespace AreasDataBase.Controllers
                             throw;
                         }
                     }
-                    return RedirectToAction(nameof(Index));
                 }
             }
-            ViewData["CityId"] = new SelectList(_context.City, "IdCity", "NameCity", residentialBuilding.Street.District.CityId);
-            ViewData["DistrictId"] = new SelectList(_context.District, "IdDistrict", "NameDistrict", residentialBuilding.Street.DistrictId);
-            ViewData["StreetId"] = new SelectList(_context.Street, "IdStreet", "NameStreet", residentialBuilding.StreetId);
+
+            SetViewBagsForDropdowns(residentialBuilding);
             return View(residentialBuilding);
         }
+
+        private void SetViewBagsForDropdowns(ResidentialBuilding residentialBuilding)
+        {
+            if (residentialBuilding.Street != null && residentialBuilding.Street.District != null && residentialBuilding.Street.District.CityId.HasValue)
+            {
+                ViewData["DistrictId"] = new SelectList(_context.District, "IdDistrict", "NameDistrict", residentialBuilding.Street.DistrictId);
+                ViewData["CityId"] = new SelectList(_context.City, "IdCity", "NameCity", residentialBuilding.Street.District.CityId);
+                ViewData["StreetId"] = new SelectList(_context.Street, "IdStreet", "NameStreet", residentialBuilding.StreetId);
+            }
+            else
+            {
+                var districts = new List<SelectListItem>
+                    {
+                        new SelectListItem { Value = "", Text = "", Selected = true }
+                    };
+                districts.AddRange(_context.District.Select(d => new SelectListItem { Value = d.IdDistrict.ToString(), Text = d.NameDistrict }));
+                ViewData["DistrictId"] = districts;
+
+                var cities = new List<SelectListItem>
+                    {
+                        new SelectListItem { Value = "", Text = "", Selected = true }
+                    };
+                cities.AddRange(_context.City.Select(c => new SelectListItem { Value = c.IdCity.ToString(), Text = c.NameCity }));
+                ViewData["CityId"] = cities;
+
+                var streets = new List<SelectListItem>
+                    {
+                        new SelectListItem { Value = "", Text = "", Selected = true }
+                    };
+                streets.AddRange(_context.Street.Select(s => new SelectListItem { Value = s.IdStreet.ToString(), Text = s.NameStreet }));
+                ViewData["StreetId"] = streets;
+            }
+        }
+
+
 
 
         public async Task<IActionResult> Delete(int? id)

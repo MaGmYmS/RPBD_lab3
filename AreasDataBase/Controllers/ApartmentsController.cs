@@ -219,6 +219,23 @@ namespace AreasDataBase.Controllers
             }
 
             var apartment = await _context.Apartment.FindAsync(id);
+            var residentialBuilding = _context.ResidentialBuilding.FirstOrDefault(rb => rb.IdResidentialBuilding == apartment.ResidentialBuildingId);
+            if (residentialBuilding != null)
+            {
+                apartment.ResidentialBuilding = residentialBuilding;
+                var street = _context.Street.FirstOrDefault(s => s.IdStreet == apartment.ResidentialBuilding.StreetId);
+                if (street != null)
+                {
+                    apartment.ResidentialBuilding.Street = street;
+                    var district = _context.District.FirstOrDefault(d => d.IdDistrict == apartment.ResidentialBuilding.Street.DistrictId);
+                    if (district != null)
+                    {
+                        apartment.ResidentialBuilding.Street.District = district;
+                        var city = _context.City.FirstOrDefault(d => d.IdCity == apartment.ResidentialBuilding.Street.District.CityId);
+                        apartment.ResidentialBuilding.Street.District.City = city;
+                    }
+                }
+            }
             if (apartment == null)
             {
                 return NotFound();

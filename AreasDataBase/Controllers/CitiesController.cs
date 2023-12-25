@@ -111,12 +111,26 @@ namespace AreasDataBase.Controllers
                 return NotFound();
             }
 
-            var city = await _context.City.FindAsync(id);
+            var city = await _context.City.FindAsync(id);   
             if (city == null)
             {
                 return NotFound();
             }
-            ViewData["AreaId"] = new SelectList(_context.Area, "IdArea", "NameArea", city.AreaId);
+
+            if (city.AreaId.HasValue)
+            {
+                ViewData["AreaId"] = new SelectList(_context.Area, "IdArea", "NameArea", city.AreaId);
+            }
+            else
+            {
+                var areas = new List<SelectListItem>
+                {
+                    new SelectListItem { Value = "", Text = "", Selected = true }
+                };
+                areas.AddRange(_context.Area.Select(a => new SelectListItem { Value = a.IdArea.ToString(), Text = a.NameArea }));
+                ViewData["AreaId"] = areas;
+            }
+
             return View(city);
         }
 
@@ -158,7 +172,21 @@ namespace AreasDataBase.Controllers
                     return RedirectToAction(nameof(Index));
                 }
             }
-            ViewData["AreaId"] = new SelectList(_context.Area, "IdArea", "NameArea", city.AreaId);
+
+            if (city.AreaId.HasValue)
+            {
+                ViewData["AreaId"] = new SelectList(_context.Area, "IdArea", "NameArea", city.AreaId);
+            }
+            else
+            {
+                var areas = new List<SelectListItem>
+                {
+                    new SelectListItem { Value = "", Text = "", Selected = true }
+                };
+                areas.AddRange(_context.Area.Select(a => new SelectListItem { Value = a.IdArea.ToString(), Text = a.NameArea }));
+                ViewData["AreaId"] = areas;
+            }
+
             return View(city);
         }
 

@@ -104,9 +104,24 @@ namespace AreasDataBase.Controllers
             {
                 return NotFound();
             }
-            ViewData["CityId"] = new SelectList(_context.City, "IdCity", "NameCity", district.CityId);
+
+            if (district.CityId.HasValue)
+            {
+                ViewData["CityId"] = new SelectList(_context.City, "IdCity", "NameCity", district.CityId);
+            }
+            else
+            {
+                var cities = new List<SelectListItem>
+                {
+                    new SelectListItem { Value = "", Text = "", Selected = true }
+                };
+                cities.AddRange(_context.City.Select(c => new SelectListItem { Value = c.IdCity.ToString(), Text = c.NameCity }));
+                ViewData["CityId"] = cities;
+            }
+
             return View(district);
         }
+
 
         [HttpPost]
         [ValidateAntiForgeryToken]
@@ -146,7 +161,20 @@ namespace AreasDataBase.Controllers
                     return RedirectToAction(nameof(Index));
                 }
             }
-            ViewData["CityId"] = new SelectList(_context.City, "IdCity", "NameCity", district.CityId);
+
+            if (district.CityId.HasValue)
+            {
+                ViewData["CityId"] = new SelectList(_context.City, "IdCity", "NameCity", district.CityId);
+            }
+            else
+            {
+                var cities = new List<SelectListItem>
+                {
+                    new SelectListItem { Value = "", Text = "", Selected = true }
+                };
+                cities.AddRange(_context.City.Select(c => new SelectListItem { Value = c.IdCity.ToString(), Text = c.NameCity }));
+                ViewData["CityId"] = cities;
+            }
             return View(district);
         }
 

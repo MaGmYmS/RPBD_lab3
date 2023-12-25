@@ -74,8 +74,6 @@ namespace AreasDataBase.Controllers
                                     "неизвестный город".ToLower().Contains(searchString.ToLower()));
                         break;
 
-                        // Для других кейсов, таких как улица и т.д., используйте аналогичный подход.
-
                 }
 
             }
@@ -136,8 +134,6 @@ namespace AreasDataBase.Controllers
             return View(street);
         }
 
-
-
         public async Task<IActionResult> Edit(int? id)
         {
             if (id == null)
@@ -146,15 +142,45 @@ namespace AreasDataBase.Controllers
             }
 
             var street = await _context.Street.FindAsync(id);
+            var district = _context.District.FirstOrDefault(d => d.IdDistrict == street.DistrictId);
+            if (district != null)
+            {
+                street.District = district;
+            }
+
             if (street == null)
             {
                 return NotFound();
             }
-            ViewData["DistrictId"] = new SelectList(_context.District, "IdDistrict", "NameDistrict", street.DistrictId);
-            ViewBag.CityId = new SelectList(_context.City, "IdCity", "NameCity");
+
+            if (street.District != null && street.District.CityId.HasValue)
+            {
+                ViewData["DistrictId"] = new SelectList(_context.District, "IdDistrict", "NameDistrict", street.DistrictId);
+
+                ViewData["CityId"] = new SelectList(_context.City, "IdCity", "NameCity", street.District.CityId);
+            }
+            else
+            {
+                var districts = new List<SelectListItem>
+                {
+                    new SelectListItem { Value = "", Text = "", Selected = true }
+                };
+                districts.AddRange(_context.District.Select(d => new SelectListItem { Value = d.IdDistrict.ToString(), Text = d.NameDistrict }));
+                ViewData["DistrictId"] = districts;
+
+                var cities = new List<SelectListItem>
+                {
+                    new SelectListItem { Value = "", Text = "", Selected = true }
+                };
+                cities.AddRange(_context.City.Select(c => new SelectListItem { Value = c.IdCity.ToString(), Text = c.NameCity }));
+                ViewData["CityId"] = cities;
+            }
 
             return View(street);
         }
+
+
+
 
         [HttpPost]
         [ValidateAntiForgeryToken]
@@ -173,7 +199,11 @@ namespace AreasDataBase.Controllers
                     street.District = district;
                 }
                 // Проверяем уникальность названия улицы внутри выбранного города
-                if (_context.Street.Any(s => s.IdStreet != street.IdStreet && s.NameStreet == street.NameStreet && s.District.CityId == street.District.CityId))
+                if (_context.Street.Any(s =>
+                    s.IdStreet != street.IdStreet &&
+                    s.NameStreet == street.NameStreet &&
+                    ((s.District == null && street.District == null) ||
+                     (s.District != null && street.District != null && s.District.CityId == street.District.CityId))))
                 {
                     ModelState.AddModelError("NameStreet", "Такая улица уже существует в выбранном городе.");
                 }
@@ -199,8 +229,30 @@ namespace AreasDataBase.Controllers
                     return RedirectToAction(nameof(Index));
                 }
             }
-            ViewData["DistrictId"] = new SelectList(_context.District, "IdDistrict", "NameDistrict", street.DistrictId);
-            ViewData["CityId"] = new SelectList(_context.City, "IdCity", "NameCity", street.District.CityId);
+
+            if (street.District != null && street.District.CityId.HasValue)
+            {
+                ViewData["DistrictId"] = new SelectList(_context.District, "IdDistrict", "NameDistrict", street.DistrictId);
+
+                ViewData["CityId"] = new SelectList(_context.City, "IdCity", "NameCity", street.District.CityId);
+            }
+            else
+            {
+                var districts = new List<SelectListItem>
+                {
+                    new SelectListItem { Value = "", Text = "", Selected = true }
+                };
+                districts.AddRange(_context.District.Select(d => new SelectListItem { Value = d.IdDistrict.ToString(), Text = d.NameDistrict }));
+                ViewData["DistrictId"] = districts;
+
+                var cities = new List<SelectListItem>
+                {
+                    new SelectListItem { Value = "", Text = "", Selected = true }
+                };
+                cities.AddRange(_context.City.Select(c => new SelectListItem { Value = c.IdCity.ToString(), Text = c.NameCity }));
+                ViewData["CityId"] = cities;
+            }
+
             return View(street);
         }
 

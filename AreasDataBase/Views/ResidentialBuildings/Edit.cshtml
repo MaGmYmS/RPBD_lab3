@@ -76,9 +76,23 @@
             var originalStreets = $('#StreetId').html();
 
             // Устанавливаем выбранные значения из модели
-            $('#CityId').val('@Model.Street.District.CityId');
-            $('#DistrictId').val('@Model.Street.DistrictId');
-            $('#StreetId').val('@Model.StreetId');
+            var selectedCity = '@(Model?.Street?.District?.CityId.ToString() ?? "")';
+            var selectedDistrict = '@(Model?.Street?.DistrictId.ToString() ?? "")';
+            var selectedStreet = '@(Model?.StreetId.ToString() ?? "")';
+
+            // Устанавливаем выбранные значения из модели, если они существуют
+            if (selectedCity) {
+                $('#CityId').val(selectedCity);
+            }
+
+            if (selectedDistrict) {
+                $('#DistrictId').val(selectedDistrict);
+            }
+
+            if (selectedStreet) {
+                $('#StreetId').val(selectedStreet);
+            }
+
 
             $('#CityId').change(function () {
                 var cityId = $(this).val();
